@@ -2,7 +2,7 @@
 
 *메뉴얼 페이지를 방문하여주신 연구자 여러분을 환영합니다.*
 
-이 문서는 사용자들이 KISTI CMS Tier-3를 보다 쉽게 사용할 수 있도록 돕기 위해 작성되었습니다. 혹시 Tier-3 사용 중에 어려움을 겪으시면 언제든 [gsdc-support@kisti.re.kr](mailto:gsdc-support@kisti.re.kr?subject=\[CMS])로 시작하는 제목으로  연락 주시기 바랍니다.
+이 문서는 사용자들이 KISTI CMS Tier-3를 보다 쉽게 사용할 수 있도록 돕기 위해 작성되었습니다. 혹시 Tier-3 사용 중에 어려움을 겪으시면 언제든 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 문의해 주시기 바랍니다.
 
 **처음 사용하시는 분은 1장부터 순서대로 따라오시면 됩니다.** 오른쪽 '이 문서의 목차'에서 원하는 장으로 바로 이동할 수 있습니다.
 
@@ -309,7 +309,7 @@ Checkwrite Result:
 Success: Able to write in /store/user/geonmo on site T2_KR_KISTI
 ```
 
-만약, 쓰기가 불가능하시면  [cmst3-support@kisti.re.kr](mailto:cmst3-support@kisti.re.kr) 로 이메일을 보내주시기 바랍니다.
+만약, 쓰기가 불가능하시면 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 문의해 주시기 바랍니다.
 
 ### Rucio 환경 설정
 
@@ -695,7 +695,7 @@ transfer_output_remaps = "result.root = result_$(Hostname).root"
 
 ### 이메일 알람 설정
 #notification = Error
-#notify_user = cmst3-support@kisti.re.kr
+#notify_user = [본인 이메일 주소]
 
 ### Group Account 정보
 
@@ -1046,7 +1046,7 @@ xrdcp root://cmsxrootd.fnal.gov//store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_
 
 ##### (1) Rucio (For Public Dataset)
 
-현재 rucio 명령어를 통해 데이터를 전송하려면 T3\_KR\_KISTI에 대한 공간 쿼터를 할당 받아야 합니다. 혹시 쿼터가 필요한 분들은 다음 정보를 포함하여 이메일로 [요청](mailto:cmst3-support.kisti.re.kr)하시기 바랍니다.
+현재 rucio 명령어를 통해 데이터를 전송하려면 T3\_KR\_KISTI에 대한 공간 쿼터를 할당 받아야 합니다. 혹시 쿼터가 필요한 분들은 다음 정보를 포함하여 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 요청하시기 바랍니다.
 
 1. 요청하는 사용자의 "CERN Computing ID"
 2. 요청하는 쿼터 용량
@@ -1058,7 +1058,7 @@ xrdcp root://cmsxrootd.fnal.gov//store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_
 >
 > 이러한 관리가 부담되신다면 개인 계정 대신 공용 계정인 **t3_kr_kisti_local_users** 로 rule을 추가하시기 바랍니다. RUCIO_USER 환경변수를 t3_kr_kisti_local_users 로 지정한 후 rule을 추가하면 됩니다.
 >
-> 단, t3_kr_kisti_local_users 계정은 해당 CERN e-group에 소속된 사용자만 사용할 수 있습니다. e-group 가입이 필요하신 분은 [cmst3-support@kisti.re.kr](mailto:cmst3-support@kisti.re.kr) 로 CERN ID와 함께 문의해 주시기 바랍니다.
+> 단, t3_kr_kisti_local_users 계정은 해당 CERN e-group에 소속된 사용자만 사용할 수 있습니다. e-group 가입이 필요하신 분은 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 CERN ID와 함께 문의해 주시기 바랍니다.
 
 ```bash
 ## 공용 계정(t3_kr_kisti_local_users)으로 rule 추가 (e-group 소속 사용자만 가능)
