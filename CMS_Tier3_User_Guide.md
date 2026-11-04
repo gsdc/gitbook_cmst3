@@ -1,0 +1,1535 @@
+# KISTI-GSDC CMS Tier-3 사용자 가이드
+
+*메뉴얼 페이지를 방문하여주신 연구자 여러분을 환영합니다.*
+
+이 문서는 사용자들이 KISTI CMS Tier-3를 보다 쉽게 사용할 수 있도록 돕기 위해 작성되었습니다. 혹시 Tier-3 사용 중에 어려움을 겪으시면 언제든 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 문의해 주시기 바랍니다.
+
+**처음 사용하시는 분은 1장부터 순서대로 따라오시면 됩니다.** 오른쪽 '이 문서의 목차'에서 원하는 장으로 바로 이동할 수 있습니다.
+
+| 단계 | 장 |
+| --- | --- |
+| 시작하기 | 1. CMS 서버 접속 |
+| 시작하기 | 2. 초기 환경 설정 |
+| 환경 이해 | 3. CMS Tier-3 컴퓨팅 환경 |
+| 배치 작업 | 4. 배치 작업 사용하기 (HTCondor 기초) |
+| 배치 작업 | 5. HTCondor를 이용한 배치 작업 수행 |
+| 배치 작업 | 6. create-batch를 이용한 배치 작업 수행 |
+| 데이터 | 7. 데이터 전송 및 데이터셋 요청 |
+| 데이터 | 8. 스토리지 접근 방법 |
+| 그리드/분석 | 9. CRAB3 사용 관련 |
+| 그리드/분석 | 10. 빅데이터 분석 환경 구축하기 |
+| 문제 해결 | 11. FAQ 및 문제 해결 |
+
+---
+
+## 1. CMS 서버 접속
+
+*이 페이지에서는 KISTI CMS Tier-3에 접속 하는 방법에 대해서 설명을 드립니다.*
+
+### 접속 정보
+
+KISTI CMS Tier-3 사용자는 아래 UI(User Interface) 서버로 접속합니다.
+
+| 항목 | 내용 |
+| --- | --- |
+| 호스트 이름 | cms-ui.sdfarm.kr |
+| SSH 포트 | 48217 |
+| 운영체제 | AlmaLinux 9 |
+| 계정 | 포털에서 발급받은 사용자 ID |
+
+> **⚠️ 주의**
+>
+> 기존 UI 서버인 ui20은 **2026년 11월 30일까지** 운영한 후 종료될 예정입니다. 앞으로는 cms-ui.sdfarm.kr 로 접속해 주시기 바랍니다. 이 문서의 일부 실행 예시에 남아 있는 `[geonmo@ui20 ~]$`, `[geonmo@ui10 ~]$` 같은 프롬프트는 예전 서버에서 실행한 예시이며, 명령어 사용법은 cms-ui.sdfarm.kr 에서도 같습니다.
+
+또한, 내부에서만 접속 가능한 GPU 서버인 cms-gpu01이 있습니다. 해당 서버는 NVidia P100이 설치되어 있어 기계학습을 이용한 프로그램을 사용하실 때에 권장됩니다. (cms-ui.sdfarm.kr 에 먼저 접속한 뒤 접속하세요.)
+
+### 리눅스 혹은 macOS 환경에서의 접속 방법
+
+리눅스 혹은 macOS에서는 운영체제에 내장된 ssh 클라이언트 프로그램을 이용하여 UI 서버에 접속하실 수 있습니다.
+
+```bash
+ssh -p 48217 [사용자 ID]@cms-ui.sdfarm.kr
+```
+
+> **💡 참고**
+>
+> ssh 명령어를 이용하여 접속을 하실 때, X-Windows 그래픽 환경을 사용하시려면 옵션으로 -X 혹은 -Y 를 추가하시기 바랍니다. 접속 후 $DISPLAY 환경변수 값을 확인하여 X11 Forwarding이 정상적으로 이루어졌는지 확인이 가능합니다.
+
+### 윈도우에서 접속 방법
+
+윈도우는 OS 차원에서 ssh 프로그램을 제공하고 있지 않습니다. 윈도우 개발자 모드를 사용하여 bash 를 띄우지 않는 한 별도의 프로그램을 이용하여 접속을 하시기 바랍니다. 가장 유명한 프로그램으로 putty와 MobaXterm 등 다양한 프로그램이 있습니다. 여기서는 MobaXterm을 기준으로 설명드립니다.
+
+#### MobaXterm
+
+##### 배경
+
+예전부터 윈도우 환경에서 ssh 터미널 환경을 사용하기 위해서 putty 프로그램을 주로 사용하였습니다. 하지만, putty 프로그램은 X-Windows 프로그램이 포함되어 있지 않기 때문에 X11 Forwarding을 사용하려면 X-ming 등의 별도의 X11 지원 프로그램을 설치하여야 했습니다. 이는 사용자가 프로그램을 별도로 설치하고 추가적인 설정 작업이 필요하기 때문에 현재는 초보자들에게 추천되지 않습니다.
+
+##### 라이선스
+
+MobaXterm 프로그램은 사용자 본인이 직접 홈페이지에서 파일을 다운로드 받아 설치할 경우 어디서나 무료입니다. 이는 내장된 X-Windows Server도 포함됩니다. 따라서, 학교 및 회사 등에서도 안심하고 다운로드 받으셔서 설치하실 수 있습니다.
+
+단, 재배포(받은 파일을 공유해주는 경우)는 라이선스 위반으로 간주하고 있으니 반드시 홈페이지에서 파일을 다운로드 받도록 안내하시기 바랍니다.
+
+##### 접속방법
+
+설치한 MobaXterm을 실행한 후 \[Session] - \[SSH] 버튼을 클릭하시고 아래 정보를 기입하시면 접속을 할 수 있는 세션을 생성하실 수 있습니다. 암호를 입력한 이후에는 암호 입력 없이 접속이 가능합니다.
+
+* Remote host : cms-ui.sdfarm.kr
+* Specify username : 사용자 ID
+* Port : 48217
+
+![그림1. \[세션\]을 클릭합니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=access-mobaxterm-session.png)
+
+![그림2. \[SSH\]를 클릭합니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=access-mobaxterm-ssh.png)
+
+> **💡 참고**
+>
+> 윈도우 환경의 경우 개별 클라이언트 프로그램에서 X11 Forwarding 기능을 활성화 혹은 비활성화를 할 수 있습니다. 해당 기능이 비활성화된 경우에는 -X 혹은 -Y 옵션 없이 접속한 것처럼 X-Windows 그래픽 환경을 사용하실 수 없습니다.
+
+##### 홈페이지 정보
+
+[https://mobaxterm.mobatek.net/](https://mobaxterm.mobatek.net/)
+
+---
+
+## 2. 초기 환경 설정
+
+*여기서는 접속 후 초기 설정에 관한 내용입니다. 리눅스 환경을 처음 써보시는 경우 아래의 환경설정을 따라하시는 것을 추천드립니다. (OTP는 포털 가입 시 기본으로 등록되며, 필요한 경우 아래 방법으로 추가 토큰을 등록할 수 있습니다.)*
+
+### OTP 등록
+
+OTP는 GSDC 포털 가입 과정에서 기본으로 등록되므로, 서버에 접속하기 위해 별도로 OTP를 등록하실 필요는 없습니다. OTP를 분실하셨거나 기기를 바꾸신 경우에는 포털 로그인 화면의 **[OTP 초기화]** 를 이용하시기 바랍니다. (**11. FAQ 및 문제 해결** 장의 '패스워드를 리셋하고 싶어요!' 참고)
+
+#### (선택) 추가 OTP 토큰 등록
+
+필요한 경우 UI 서버에서 새 OTP 토큰을 추가로 등록할 수 있습니다. 같은 OTP 번호는 한 번만 사용할 수 있기 때문에, 짧은 시간 안에 연속으로 두 번 로그인해야 하는 경우(예: 터미널 두 개를 동시에 여는 경우) 추가 토큰이 있으면 다음 번호를 기다리지 않고 다른 토큰의 번호로 바로 로그인할 수 있습니다.
+
+```bash
+## 언어 혹은 인코딩 설정이 C 로 되어 있는 경우에는 OTP QR 코드가 정상적으로 표시되지 않습니다.
+## 비트워든 같은 프로그램은 QR코드가 아니라 URI로 등록이 가능하므로 이를 이용하실 때에는 무시하셔도 됩니다.
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+## 새 OTP 토큰을 추가로 발급합니다.
+ipa otptoken-add
+```
+
+### 그리드 인증서 설치
+
+#### 인증서 발급과 VO CMS 가입
+
+인증서는 CERN CA 홈페이지([https://ca.cern.ch/ca/](https://ca.cern.ch/ca/))에서 \[New Grid User certificate] 항목을 이용하여 발급 받을 수 있습니다. 인증서는 발급 받은 직후에는 아무런 권한이 부여되어 있지 않습니다.  발급 후 VO CMS ([https://lcgvoms24.cern.ch:8443/voms/cms/user/home.action](https://lcgvoms24.cern.ch:8443/voms/cms/user/home.action)) 를 방문하여 CMS 자원 활용을 허가 받을 수 있습니다.
+
+사용자는 VO CMS에 승인된 그리드 사용자 인증서를 이용하여 CMS 자원들에 접근할 수 있습니다. 예외적으로 KISTI CMS Tier-3 사용자 분들은 KISTI CMS Tier-3에 저장된 데이터에 접근을 할 때 해당 인증 없이 사용이 가능하도록 설정되어 있습니다. 하지만, 외부에 존재하는 데이터에 접근하기 위해서는 반드시 사용자 인증서가 있어야 합니다. 또한, 사용자가 그리드 작업을 제출하려면  본인의  인증서를 제출하려는 서버에 설치하여야 합니다.
+
+#### 인증서 매핑 작업
+
+KISTI에서도 인증서를 발급하고 있습니다. ([http://ca.gridcenter.or.kr/](http://ca.gridcenter.or.kr/)) 해당 인증서를 발급 받고 CERN 인증서와 동일하게 사용하시려면 인증서 매핑 작업을 수행하여야 합니다.  인증서를 CERN 컴퓨팅 계정과 동기화해야하기 때문에 일반적인 경우에는 필요가 없습니다. 하지만, CERN 이외의 프로젝트를 같이 수행할 경우 KISTI 인증서가 편리할 수도 있습니다. (타 프로젝트에서 인증서 매핑을 지원하지 않을 경우)
+
+CERN 인증서는 CERN 컴퓨팅 계정과 자동으로 매핑되기 때문에 별도의 설정이 필요 없으나 KISTI에서 인증서를 발급 받으시면 반드시 CERN CA 홈페이지에 접속하셔서 매핑 작업을 하셔야 합니다.
+
+![KISTI 인증서는 CERN CA 홈페이지에 계정과 매칭을 시킬 수 있습니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=setup-cern-ca-mapping.png)
+
+CERN CA나 KISTI CA를 통해 발급 받은 인증서를 브라우저의 인증서 관리를 통해 .pfx 파일로 추출할 수 있습니다. 이를 CMS Tier-3 UI 서버로 업로드하실 수 있습니다.
+
+#### 인증서 복사
+
+##### 리눅스 혹은 MacOS 사용자
+
+scp 명령어를 통해 파일을 UI 서버로 전송하실 수 있습니다.
+
+```bash
+## ssh 명령어와 달리 대문자 P로 포트 번호를 지정합니다.
+scp -P 48217 [인증서 파일] [사용자 ID]@cms-ui.sdfarm.kr:~/
+```
+
+##### 윈도우 사용자
+
+윈도우 사용자들은 MobaXterm의 \[Session] - \[SFTP] 를 이용하여 파일을 전송하실 수 있습니다.
+
+![MobaXterm의 \[SFTP\] 세션 화면. 드래그를 통해 파일을 전송할 수 있습니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=setup-mobaxterm-sftp.png)
+
+##### 인증서 변환 및 설정
+
+복사된 인증서 .pfx  혹은 .p12 파일을 이용하여 그리드 작업 프로그램에서 사용하는 PEM 형식으로 파일을 변환합니다.
+
+```bash
+mkdir $HOME/.globus
+chmod 755 $HOME/.globus
+openssl pkcs12 -in myCert.p12 -clcerts -nokeys -out $HOME/.globus/usercert.pem
+openssl pkcs12 -in myCert.p12 -nocerts -out $HOME/.globus/userkey.pem
+chmod 644 $HOME/.globus/usercert.pem
+chmod 400 $HOME/.globus/userkey.pem
+```
+
+### (향후 사용예정) OIDC를 이용한 scitoken 등록
+
+oidc-agent는 사용방법이 기존 SSH 인증서를 등록하는 ssh-agent와 사용방법이 유사합니다. 사용방법을 잊어버렸을 경우를에대비하여   ssh-agent 사용방법과 유사하게 사용을 할 수 있도록 구성을 하시는 것을 추천드립니다.
+
+#### 1. oidc-agent 설정 및 oidc-gen으로 신규 scitoken 등록 및 사용
+
+```bash
+eval $(oidc-agent)
+oidc-gen -w device [token_name]
+
+# Issuer [https://iam-test.indigo-datacloud.eu/]: 
+# Issuer 로 https://cms-auth.web.cern.ch/ 입력
+https://cms-auth.web.cern.ch/
+
+# Scopes로 max 입력. 향후 scope 정보를 잘 알게되면 조정할 것
+max
+```
+
+#### 2. https://cms-auth.web.cern.ch/device 접속 후 코드 입력
+
+```bash
+Registering Client ...
+Warning: The registered client does not have all the requested scopes. The following are missing: storage.create:/store/temp/sitetest storage.modify:/store/temp/sitetest
+To update the client to have all the requested scope values, please contact the provider.
+Generating account configuration ...
+accepted
+
+Using a browser on any device, visit:
+https://cms-auth.web.cern.ch/device
+
+And enter the code: ?????
+Alternatively you can use the following QR code to visit the above listed URL.
+```
+
+#### 3. scitoken의 비밀번호 입력
+
+```bash
+Enter encryption password for account configuration 'geonmo_scitoken': 
+Confirm encryption Password: 
+Everything setup correctly!
+```
+
+#### 4. 토큰 사용을 위한 oidc 토큰 등록 및 임시토큰 발행
+
+```bash
+oidc-add [Token Name]
+
+export BEARER_TOKEN=$(oidc-token --scope=storage.read:/ --scope=compute.read --time=3600 [Token Name])
+```
+
+#### 5. 토큰을 이용한 테스트
+
+```bash
+## XRootD
+XrdSecPROTOCOL="ztn,unix";export XrdSecPROTOCOL
+
+xrdfs cms-xrdr.sdfarm.kr ls /xrd
+xrdfs cms-t2-se01.sdfarm.kr:1095 ls /
+
+## WebDAVs
+davix-ls  --capath /etc/grid-security/certificates -H "Authorization: Bearer ${BEARER_TOKEN}" davs://cms-t2-se01.sdfarm.kr:2880//store/user/geonmo
+
+```
+
+### CMSSW 환경 설정
+
+CMS 연구 프레임워크인 CMSSW는 CERN에서 제공하는 CVMFS(CERN Virtual Machine File System)에 의해 제공됩니다. 따라서, 아래 명령어를 실행하여 CMSSW 사용 환경을 구축할 수 있습니다.
+
+```bash
+## bash 사용자
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+## tcsh 사용자
+source /cvmfs/cms.cern.ch/cmsset_default.csh
+```
+
+환경변수들이 올바르게 적용되면 scram, cmsenv 등 CMSSW 명령어들을 사용하실 수 있습니다. 아래와 같은 방법으로 CMSSW 버전을 확인할 수 있습니다.
+
+```bash
+## cms-ui.sdfarm.kr (AlmaLinux 9)
+export SCRAM_ARCH=el9_amd64_gcc12
+scram list CMSSW
+```
+
+UI 서버는 AlmaLinux 9(EL9)이므로 EL9용 SCRAM_ARCH(el9_amd64_gccXX)를 사용합니다. SLC6/CentOS7(slc6_*, slc7_*) 용 구버전 CMSSW가 필요한 경우에는 CVMFS에서 제공하는 컨테이너 명령어(cmssw-el6, cmssw-el7)로 해당 OS 환경에 들어간 뒤 작업하시기 바랍니다.
+
+```bash
+## 예) CentOS7 환경이 필요한 구버전 CMSSW 사용
+cmssw-el7
+export SCRAM_ARCH=slc7_amd64_gcc700
+scram list CMSSW
+```
+
+> **💡 참고**
+>
+> CMSSW 소프트웨어의 버전은 연구별로 상이하므로 개별적으로 확인 바랍니다. SCRAM\_ARCH 변수를 통해 설치 가능한 CMSSW의 버전이 변동되므로 참고 바랍니다. 자세한 버전 설명은 CMSSW GitHub 홈페이지([http://cms-sw.github.io/showIB.html](http://cms-sw.github.io/showIB.html))를 참고하시거나 Release Map([https://cmssdt.cern.ch/SDT/releases.map](https://cmssdt.cern.ch/SDT/releases.map))을 참고하시기 바랍니다. (참고 : type=Production;state=Announced;prodarch=1)
+
+### CMSSW 작업 디렉토리 생성
+
+CMSSW 버전을 확인한 후에 다음 명령어로 CMSSW 작업 디렉토리를 생성할 수 있습니다.
+
+```bash
+## SCRAM_ARCH 지정 (cms-ui.sdfarm.kr, EL9)
+export SCRAM_ARCH=el9_amd64_gcc12
+## 작업 디렉토리 생성 (CMSSW_X_Y_Z 는 scram list CMSSW 로 확인한 버전)
+cmsrel CMSSW_X_Y_Z
+### 디렉토리 이름을 지정할 경우,
+scram p -n workspace CMSSW CMSSW_X_Y_Z
+```
+
+작업 디렉토리가 생성되면 해당 디렉토리를 이용하여 환경변수를 설정할 수 있습니다. 이를 실행하여야 CRAB이 사용가능합니다.
+
+```bash
+cd CMSSW_X_Y_Z
+cd src
+cmsenv
+```
+
+### CRAB 환경 설정
+
+CRAB은 CMS 연구자들이 사용하는 그리드 작업 제출 프로그램입니다.
+
+CRAB을 사용하려면 CRAB과 관련한 환경변수들을 적용하여야 합니다. CVMFS를 통해 해당 환경변수들을 설정하실 수 있습니다.
+
+```bash
+### 올바른 CMSSW 작업 디렉토리에서 cmsenv를 수행한 후에,
+### For bash users,
+source /cvmfs/cms.cern.ch/crab3/crab.sh
+```
+
+그리드 작업을 제출하기 앞서 반드시 본인이 T2\_KR\_KISTI와 T3\_KR\_KISTI에 쓰기 권한이 있는지를 확인하셔야 합니다.
+
+다음 명령어로 이를 확인하실 수 있습니다.
+
+```bash
+## To T2_KR_KISTI
+crab checkwrite --site=T2_KR_KISTI
+
+## To T3_KR_KISTI
+crab checkwrite --site=T3_KR_KISTI
+```
+
+```
+Checkwrite Result:
+Success: Able to write in /store/user/geonmo on site T2_KR_KISTI
+```
+
+만약, 쓰기가 불가능하시면 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 문의해 주시기 바랍니다.
+
+### Rucio 환경 설정
+
+Rucio는 ATLAS실험에서 데이터셋 관리를 위해 작성된 데이터 관리 프로그램입니다. Rucio를 사용하려면 아래 설정이 필요합니다.
+
+```bash
+## No cmsenv environment
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+source /cvmfs/cms.cern.ch/rucio/setup.sh
+## RUCIO_USER에는 CERN ID를 지정합니다.
+export RUCIO_USER=[CERN ID]
+
+## or T3_KR_KISTI에서는 위 명령어를 다음 예약어로 설정하여 사용 중입니다. (KISTI ID를 RUCIO_USER로 사용하므로 CERN ID와 KISTI ID가 같은 경우에만 사용하세요.)
+### rucioenv는 cmsenv 설정 후에는 작동하지 않습니다. 
+### 별개의 세션(신규 접속)에서 실행하는 것을 추천드립니다.
+rucioenv
+```
+
+### 장기 보관 스토리지(/xrd) 사용
+
+KISTI CMS Tier-3에서 제공해드리는 장기 보관용 저장소(permanent 스토리지)는 클러스터 내부(UI 서버 및 WN)에 /xrd 디렉토리로 연결되어 있습니다. 예전처럼 /xrootd\_users 디렉토리 마운트를 별도로 신청하실 필요 없이, /xrd 경로를 일반 디렉토리처럼 사용하시면 됩니다.
+
+개인 데이터는 /xrd/store/user/[CERN ID] 디렉토리에 저장합니다. 본인의 CERN 컴퓨팅 계정(CERN ID)을 잘 모르실 경우 아래의 CRAB 명령어를 통해 확인하실 수 있습니다.
+
+```bash
+crab checkusername
+```
+
+```
+Retrieving DN from proxy...
+DN is: /C=KR/O=KISTI/O=KISTI/CN=58079576 Geonmo Ryu
+Retrieving username for this DN...
+username is geonmo
+```
+
+```bash
+ls /xrd/store/user/[CERN ID]
+cp result.root /xrd/store/user/[CERN ID]/
+```
+
+> **💡 참고**
+>
+> /xrd 디렉토리의 파일은 일반 디렉토리를 사용하시듯이 cp, mv, rm 등 일반 명령어로 관리하시면 됩니다.
+
+### GitHub 사용을 위한 공개키 등
+
+CMS 연구에 사용되는 많은 코드들은 현재 GitHub에 등록되어 있습니다. 해당 코드를 UI 서버로 다운로드 받으실 때에는 저장소에서 제공되는 HTTPS 명령어를 사용하시면 편리하게 이용하실 수 있습니다. 하지만, 해당 저장소의 코드를 수정한 후 다시 업로드를 원하신다면 GitHub에 공개키를 등록하시기를 권장드립니다.
+
+SSH 공개키를 만들기 위해서는 다음과 같은 작업이 필요합니다.
+
+```bash
+[geonmo@ui10 .ssh]$ ssh-keygen -t rsa
+Generating public/private rsa key pair.
+Enter file in which to save the key (/cms/ldap_home/geonmo/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /cms/ldap_home/geonmo/.ssh/id_rsa.
+Your public key has been saved in /cms/ldap_home/geonmo/.ssh/id_rsa.pub.
+The key fingerprint is:
+1c:17:f5:77:f0:77:06:f6:8e:3e:32:49:24:2c:e9:cf geonmo@ui10.sdfarm.kr
+The key's randomart image is:
++--[ RSA 2048]----+
+|          ... +  |
+|         o . o = |
+|        + + . . O|
+|       o + o   =+|
+|        S   . . .|
+|         o . o   |
+|          E + o  |
+|             o . |
+|                 |
++-----------------+
+
+```
+
+> **⚠️ 주의**
+>
+> 암호를 입력하지 않은 공개 및 비밀키를 만드시려면 Enter passphrase 항목에서 내용 없이 엔터를 입력하시면 됩니다. 해당 ssh 키 중 비밀키(id\_rsa)는 절대 유출이 되면 안됩니다. 암호 없이 만들어지기 때문에 외부 유출이 되면 해킹의 위험이 크므로 관리를 철저히 해주시기 바랍니다. (패스워드 유무와 상관없이 비밀키는 유출되면 안됩니다.)
+
+> **💡 참고**
+>
+> 만약 암호를 설정하셨다면 ssh-agent를 이용하여 한번만 암호를 입력하시고 해당 세션 정보로 다른 서버로 접속하는 등의 기능을 사용하실 수 있습니다. 해당 내용은 여기서 다루지 않습니다.
+
+생성된 공개키를 GitHub에 등록하시려면 해당 공개키의 정보를 확인하셔야 합니다. 간단하게 cat 명령어를 이용하여 내용을 확인하실 수 있습니다.
+
+```bash
+[geonmo@ui10 .ssh]$ cat id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAx3hsrp0tvlSt/Icp2hGQxeRmlIejJTugj/v4DnoztKRQIIiRgWKHDpxKji1eR7A9YusN51G6bZL5RZzJSfgbWiVBfmAKNfiQjHMte80vQlWdtTVXXff05k+aslqUWUTnuquhRnbS0hngamFrISW5/cQMDWUXEi0E4+UKcweG4pWsAYOaFgshj9dQ63JtOMOmbamhXNMxwhtFViQMSHVrEikHXsVIQx6bt64CYjQoGkkyXyqb5AdOtUtwDgRp/GIJSTia78NugdlGY/SdGmYlFR00LpNOqVoJ1tDRS6TniCmx26gTiUUYVDZ84WyNtvwFDaSphdBDDn3rXlgEuf9iBQ== geonmo@ui10.sdfarm.kr
+```
+
+GitHub에 계정 가입 후 로그인을 한 후 \[프로필 사진] - \[계정 설정]을 클릭합니다.
+
+![\[계정 설정\] 항목 위치 ](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=setup-github-account-settings.png)
+
+\[Settings] - \[SSH and GPG keys] - \[New SSH Key] 항목을 선택한 후 위에서 확인한 키 정보를 입력해줍니다.
+
+![SSH and GPG Keys 정보 ](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=setup-github-ssh-gpg-keys.png)
+
+등록이 완료되면 해당 저장소의 권한 설정에 따라 내용 수정 (commit)후 업로드(git push)가 가능해집니다. 물론, 저장소에 대한 권한이 없다면 불가능하오니 참고 바랍니다.
+
+### GitHub SSH 접속을 443 포트로 변경하기
+
+UI 서버에서는 외부로 나가는 SSH 기본 포트(22번)가 막혀 있어 `git@github.com:...` 형식의 SSH 주소로 git clone, git push 를 하면 접속이 되지 않습니다. 이 경우 GitHub가 제공하는 443 포트용 SSH 서버(ssh.github.com)를 사용하도록 설정하시면 됩니다.
+
+UI 서버의 `~/.ssh/config` 파일에 아래 내용을 추가합니다. (파일이 없으면 새로 만듭니다.)
+
+```
+Host github.com
+    Hostname ssh.github.com
+    Port 443
+    User git
+```
+
+```bash
+## 설정 파일 권한 지정
+chmod 600 ~/.ssh/config
+## 접속 확인
+ssh -T git@github.com
+```
+
+처음 접속할 때 호스트 키 확인 메시지가 나오면 `yes`를 입력합니다. 아래와 같은 메시지가 나오면 정상적으로 설정된 것입니다. 이후에는 기존과 동일하게 `git@github.com:...` 주소를 그대로 사용하시면 됩니다.
+
+> Hi [GitHub ID]! You've successfully authenticated, but GitHub does not provide shell access.
+
+### 참고문헌
+
+1. CERN CA 홈페이지([https://ca.cern.ch/ca/Help/?kbid=024010](https://ca.cern.ch/ca/Help/?kbid=024010))
+2. VO CMS 가입 홈페이지([https://lcgvoms24.cern.ch:8443/voms/cms/user/home.action](https://lcgvoms24.cern.ch:8443/voms/cms/user/home.action))
+3. CMS 인증서 발급 안내 TWiki page ([https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideLcgAccess](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideLcgAccess))
+4. CMS 워크북 TWiki Page ([https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook))
+5. GitHub Docs - Using SSH over the HTTPS port ([https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port](https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port))
+
+---
+
+## 3. CMS Tier-3 컴퓨팅 환경
+
+*이 페이지에서는 KISTI-GSDC CMS Tier-3의 컴퓨팅 환경 및 구성에 대하여 알려드립니다.*
+
+### 컴퓨팅 자원 소개
+
+![KISTI CMS Tier-3 구조도](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=cms-tier3-architecture.png)
+
+#### 계산 자원
+
+CMS Tier-3는 ALICE Tier-3인 KiAF 클러스터, 유전체사용자와클러스터 통합 환경으로 구성되어 있습니다. CMS Tier-3의 최저보장 논리CPU코어의 쿼터는  총 2,288개입니다. (물리코어는 절반인 1,144개)
+
+KIAF의 1696, BIO의 1160개와 합쳐 총 5,144개의 작업 슬롯을 가지고 있습니다.
+
+CPU 코어들은 HTCondor 작업 관리자를 이용하여 자원을 배치하거나 회수합니다. 따라서, 작업을 제출하기 위해서는 HTCondor 사용방법을 알아야 합니다.
+
+또한, 다른 그룹 사용자의 작업이 없을 경우에는 2,288개를 넘게 사용할 수 있습니다. 하지만, KIAF 사용자가 작업을 제출할 경우 KIAF 몫인 1696개의 코어를 자동으로 반납하며 반납된 작업 슬롯에서 실행되던 작업은 취소되어 대기열에 들어갑니다.
+
+자세한 사용방법은 **4. 배치 작업 사용하기 (HTCondor 기초)** 장과 **5. HTCondor를 이용한 배치 작업 수행** 장을 참고해주시기 바랍니다.
+
+#### GPU 자원
+
+KISTI-GSDC CMS Tier-3에는 머신러닝, GPGPU 기능 제공을 위해 GPU 서버를 1대 구비하고 있습니다.  이를 사용하시려면 cms-ui.sdfarm.kr 에 접속한 뒤 GPU 서버(cms-gpu01)로 접속하여 사용하시기를 권장드립니다.
+
+해당 서버로 접속하기 위해 아래 명령어를 사용하십시오.
+
+```bash
+## 외부에서는 접근이 안됩니다. (ui 서버에서 접속하세요.)
+ssh cms-gpu01
+```
+
+##### 1. /cms (사용자 홈디렉토리 및 스크래치 공간)
+
+/cms 공간은 사용자들의 홈디렉토리 및 임시 작업물 보관을 위한 스크래치 용으로 제공됩니다. 총 저장공간은 20TB로 NAS 형식으로 마운트되어 있습니다. 홈디렉토리와 스크래치 공간은 서로 같은 공간을 공유하여 사용합니다.
+
+스크래치를 너무 많이 사용하면 홈디렉토리 사용에도 지장을 주기 때문에 결과물의 크기를 미리 예측하여 문제가 발생하지 않도록 주의하여 사용하시기 바랍니다.
+
+> **❗ 중요**
+>
+> /cms 디렉토리는 모든 사용자가 2.5TB만 사용하실 수 있습니다. 추가 용량이 필요하시다면 아래 설명된 /cms\_scratch를 활용하시거나 스토리지로 바로 전송하도록 구성하여야 합니다.
+
+##### 2. /cms\_scratch (배치 스크래치 공간)
+
+공간 부족에 의하 추가로 10TB를 할당받은 공간입니다.
+
+> **❗ 중요**
+>
+> 해당 공간은 UI 및 WN에서 접근이 가능하지만 **파일 생성 후 7일**이 지나면 모든 파일이 삭제됩니다.
+
+##### 3. /xrd (장기 보관 스토리지)
+
+기존 XRootD 스토리지(/xrootd)는 **Lustre 볼륨**으로 변경되었으며, 클러스터 내부(UI 서버 및 WN)에 /xrd 디렉토리로 연결되어 있습니다. 장기 보관이 필요한 데이터는 cp 등 일반 명령어로 /xrd 아래(개인 데이터는 /xrd/store/user/[CERN ID])에 복사하시면 됩니다.
+
+```bash
+cp -r /cms/ldap_home/[ID]/my_results /xrd/store/user/[CERN ID]/
+```
+
+외부에서 접근할 때는 아래 표의 XRootD(root://cms-xrdr.sdfarm.kr:1094) 또는 WebDAV(davs://cms-xrdr.sdfarm.kr:1094) 주소를 사용합니다.
+
+GSIFTP는 현재 사용되지 않으며, 대신 WebDAV 프로토콜을 제공합니다. WebDAV는 XRootD와 같은 서버(cms-xrdr.sdfarm.kr)와 포트(1094), 같은 디렉토리(/xrd/store)를 사용하고 접두어만 davs:// 로 다릅니다. gfal util(gfal-copy, gfal-ls)이나 davix(davix-ls, davix-get) 명령어로 사용할 수 있습니다.
+
+| Protocol  | WebDAV | XROOT for Public | 클러스터 내부 (UI, WN) |
+| --------- | :---: | :---: | :---: |
+| Prefix    | davs:// | root:// | 없음 (로컬 경로) |
+| Server    | cms-xrdr.sdfarm.kr | cms-xrdr.sdfarm.kr | - |
+| Directory | /xrd/store | //xrd/store | /xrd/store |
+| Port      | 1094 | 1094 | - |
+| Client    | gfal util (gfal-copy, gfal-ls), davix | xrdfs, xrdcp | ls, cp, ROOT 등 일반 파일 경로로 사용 |
+| Full URL  | davs://cms-xrdr.sdfarm.kr:1094/xrd/store | root://cms-xrdr.sdfarm.kr:1094//xrd/store | /xrd/store |
+
+> **💡 참고**
+>
+> 시스템 변경으로 클러스터 내부(UI 서버 및 WN)에서 permanent 스토리지를 사용할 때는 더 이상 root://cms-xrdr.private.lo:2094 를 사용하지 않고 /xrd 디렉토리를 바로 사용하시면 됩니다. 예) root://cms-xrdr.private.lo:2094//xrd/store/user/\[ID]/a.root → /xrd/store/user/\[ID]/a.root
+
+---
+
+## 4. 배치 작업 사용하기 (HTCondor 기초)
+
+*테스트를 위한 작업이 아니라 대용량 데이터를 처리하기 위한 배치 작업의 사용 방법을 배웁니다.*
+
+### HTCondor에 관하여
+
+HTCondor는 우리 CMS Tier-3에서 제공하는 배치 시스템입니다. 해당 프로그램을 이용하여 작업 제출, 작업 결과 확인, 장비 상태 확인 등의 작업을 처리할 수 있습니다.
+
+#### HTCondor 사용시 알아둬야하는 부분
+
+* 클러스터 내부(UI, WN)에서는 permanent 스토리지를 /xrd 디렉토리로 바로 사용하면 됩니다. (예: /xrd/store/user/\[ID]/...) 이전에 사용하던 root://cms-xrdr.private.lo:2094 접두어는 더 이상 사용하지 않습니다.
+* 외부에서 KISTI 저장소에 접근을 하려면 root://cms-xrdr.sdfarm.kr:1094 (XRootD) 또는 davs://cms-xrdr.sdfarm.kr:1094 (WebDAV) 를 사용하여야 합니다.
+  * 이 경로는 사용자 프록시 인증서가 꼭 필요합니다.  (voms-proxy-init 명령어 참고)
+  * 실행 스크립트에서 인증서를 /tmp로 보내거나 작업디렉토리($\_CONDOR\_SCRATCH\_DIR)를 인증서 보관 디렉토리로 지정하여야 합니다.
+
+### HTCondor 명령어 익혀보기
+
+#### condor\_status
+
+condor\_status 명령어는 머신들의 상태를 확인하는 명령어입니다. 일반적으로 옵션 없이 사용되는 명령어를 자주 사용합니다.
+
+```
+[geonmo@ui20 geonmo]$ condor_status                                                                                                                         
+Name                             OpSys      Arch   State     Activity LoadAv Mem     ActvtyTime                                                             
+                                                                                                                                                            
+slot1@cms-gpu01.sdfarm.kr        LINUX      X86_64 Unclaimed Idle      0.000 386684  2+21:24:51                                                             
+slot1@cms-t3-wn3001.sdfarm.kr    LINUX      X86_64 Unclaimed Idle      0.000 193349  0+16:29:10                                                             
+slot2@cms-t3-wn3001.sdfarm.kr    LINUX      X86_64 Unclaimed Idle      0.000  87842  2+18:49:40                                                             
+slot2_1@cms-t3-wn3001.sdfarm.kr  LINUX      X86_64 Claimed   Busy      0.010   2944  0+14:22:49                                                             
+slot2_9@cms-t3-wn3001.sdfarm.kr  LINUX      X86_64 Claimed   Busy      1.000   2944  2+19:09:24                                                             
+slot2_10@cms-t3-wn3001.sdfarm.kr LINUX      X86_64 Claimed   Busy      1.000   2944  2+19:06:09       
+```
+
+> **💡 참고**
+>
+> 작업이 실행되는 작업 슬롯은 요청된 작업의 특성에 따라 유동적으로 변하게 됩니다. KISTI CMS Tier-3에서는 각 머신당 3개의 유동 슬롯을 준비하였으며 각각의 슬롯은 2:1:1로 CPU 자원을 할당하였습니다.
+
+> **❗ 중요**
+>
+> CMS 작업은 아무런 옵션이 없이 제출될 경우 CPU 1개, 메모리 2933MB를 사용하도록 설정됩니다. 이 자원 요구량기보다 더 크게 요청할 경우 자원 확보가 용이하지 않아 작업이 실행되지 않을 수 있으니 참고 바랍니다.
+
+### condor\_q
+
+condor\_q는 작업에 대한 정보를 확인할 수 있습니다. 제출된 작업의 자세한 정보를 위해서는 -l( -long) 옵션을 사용하여 확인이 가능합니다.
+
+```bash
+[geonmo@ui20 geonmo]$ condor_q
+
+-- Schedd: ui10.sdfarm.kr : <134.75.124.121:9618?... @ 05/21/20 10:59:50
+OWNER  BATCH_NAME                                                   SUBMITTED   DONE   RUN    IDLE   HOLD  TOTAL JOB_IDS
+jhchoi RequestTest_VBFHToWWToLNuQQ_M350__2016__10000               5/16 15:46      _      1      _      _      1 3671768.0
+jhchoi RequestTest_VBFHToWWToLNuQQ_M450__2016__10000               5/16 15:46      _      1      _      _      1 3671777.0
+jhchoi RequestTest_VBFHToWWToLNuQQ_M175__2016__10000               5/16 15:46      _      1      _      _      1 3671780.0
+
+[geonmo@ui20 geonmo]$ condor_q -l 3671768.0 | grep Request
+RequestCpus = 1
+RequestDisk = DiskUsage
+RequestMemory = 2930
+Requirements = ((HasSingularity == true)) && (TARGET.Arch == "X86_64") && (TARGET.OpSys == "LINUX") && (TARGET.Disk >= RequestDisk) && (TARGET.Memory >= RequestMemory) && ((TARGET.FileSystemDomain == MY.FileSystemDomain) || (TARGET.HasFileTransfer))
+
+```
+
+condor\_q  -better-analyze 명령어를 통해 작업이 요구 조건 확인할 수 있습니다. 작업이 정지 상태라면 정지 원인도 확인 가능합니다.
+
+```bash
+[geonmo@ui20 geonmo]$ condor_q -better-analyze 3671768.0 
+
+-- Schedd: ui10.sdfarm.kr : <134.75.124.121:9618?...
+The Requirements expression for job 3671768.000 is
+
+    ((HasSingularity == true)) && (TARGET.Arch == "X86_64") && (TARGET.OpSys == "LINUX") && (TARGET.Disk >= RequestDisk) &&
+    (TARGET.Memory >= RequestMemory) && ((TARGET.FileSystemDomain == MY.FileSystemDomain) || (TARGET.HasFileTransfer))
+
+Job 3671768.000 defines the following attributes:
+
+    DiskUsage = 2
+    FileSystemDomain = "sdfarm.kr"
+    RequestDisk = DiskUsage
+    RequestMemory = 2930
+
+The Requirements expression for job 3671768.000 reduces to these conditions:
+
+         Slots
+Step    Matched  Condition
+-----  --------  ---------
+[0]         211  HasSingularity == true
+[1]         211  TARGET.Arch == "X86_64"
+[3]         211  TARGET.OpSys == "LINUX"
+[5]         211  TARGET.Disk >= RequestDisk
+[7]         211  TARGET.Memory >= RequestMemory
+[9]         211  TARGET.FileSystemDomain == MY.FileSystemDomain
+
+3671768.000:  Job is running.
+
+Last successful match: Wed May 20 21:41:45 2020
+
+3671768.000:  Run analysis summary ignoring user priority.  Of 88 machines,
+      0 are rejected by your job's requirements
+      0 reject your job because of their own requirements
+      0 match and are already running your jobs
+      0 match but are serving other users
+     88 are able to run your job
+
+-- Schedd: ui20.sdfarm.kr : <134.75.124.127:9618?...
+
+```
+
+### condor\_history
+
+종료된 작업에 관한 정보를 확인하기 위한 명령입니다. 사용방법은 condor\_q 명령어와 동일합니다.
+
+### condor\_submit
+
+준비된 작업 제출 명세 파일(Job Description Submit File, .sub 혹은 .jds)을 이용하여 작업을 제출합니다. 기본적인 작업 제출 명세파일의 양식은 다음과 같습니다.
+
+**📄 template.jds**
+```bash
+#### 작업목록에서 확인할이름을 지정합니다. 
+JobBatchName = condorTestJobs 
+#### executable은 실행할 프로그램을 입력합니다. 
+# 바이너리 실행 파일을 입력하기도 하지만, 
+# 일반적으로 실행파일의 환경설정을 위해 Bash 스크립트 파일을 넣습니다.
+executable = test.sh
+#### universe는 작업 실행 환경을 지정합니다.
+# 기본값은 vanilla이며, 컨테이너를 실행하기 위한 container 유니버스 등도 존재합니다.
+# KISTI CMS Tier-3에서는 작업 OS를 지정할 수 있는 container 유니버스를 권장합니다. (아래 '작업 실행 OS 지정' 참고)
+universe   = vanilla
+#### arguments는 프로그램의 인자를 입력합니다.
+# 여기서 사용된 $(Process)는 제출된 작업의 Process Id입니다.
+# eg) test.sh 13
+# FYI) JobId = $(Cluster).$(Process),  
+arguments  = $(Process)
+
+### 사용자의 환경변수를 WN에 전달하기 위한 옵션
+# 하지만, 100% 전달되는 것은 아니기 때문에 확인이 꼭 필요.
+getenv     = True
+
+### 파일의 송수신 기능 활성화
+# 이 기능이 꺼졌다면 executable 파일을 WN로 전송하지 않습니다.
+# 또한, 실행 결과 파일도 가져오지 않습니다. 
+# 작업 결과 파일을 가져오지 않고 공유 디렉토리에서 실행할 경우에는 NO로 설정합니다.
+should_transfer_files = YES
+### 위 키워드와 같이 사용합니다.
+when_to_transfer_output = ON_EXIT
+
+### 요구조건 설정
+# 여기서는 Hostname과 동일한 Machine을 사용하도록 설정하였습니다.
+# 특별한 조건이 필요한 머신만 특정지어 사용할 때 사용됩니다.
+requirements = (Machine =?= "$(Hostname)")
+
+### CMS에서만 사용되는 별도의 태그들 (선택사항)
+# Tag는 프로그램의 이름, JobType은 MC, Analysis 중 설정합니다.
++Tag = "condor_check v1.22"
++JobType = "Analysis"
+
+### 실행시 표준 출력 및 에러 저장 파일
+output = job_$(Hostname).out
+error = job_$(Hostname).err
+### 작업 제출 때의 로그, submit 머신의 로그라고 볼 수 있습니다.
+log = job.log
+
+### 송신할 입력 파일 및 수신할 결과 파일 이름 지정
+transfer_input_files = input_sandbox.tar.gz 
+transfer_output_files = result.root
+### 결과파일의 이름이 작업마다 겹칠 경우 다른 이름으로 저장하도록 지정하여야 합니다.
+# 여기서는 result.root 파일들을 Hostname 변수를 추가하여 저장합니다.
+transfer_output_remaps = "result.root = result_$(Hostname).root"
+
+### 자원 요구량 설정
+#request_Cpus=1
+#request_GPUs =0 
+#request_memory=2933
+#request_disk = 1
+
+### 이메일 알람 설정
+#notification = Error
+#notify_user = [본인 이메일 주소]
+
+### Group Account 정보 (통합팜 사용을 위해 반드시 필요)
+accounting_group = group_cms
+
+#queue 13
+
+queue 1 Hostname from test.txt
+```
+
+JDS 파일을 이용하여 작업을 제출할 때는 아래 명령어로 실행합니다.
+
+```bash
+condor_submit template.jds
+```
+
+#### 결과 파일을 /xrd에 바로 저장하기 (transfer\_output\_remaps)
+
+transfer\_output\_files 와 transfer\_output\_remaps 를 함께 사용하여 결과 파일을 장기 보관 스토리지(/xrd)에 저장하려는 경우에는, remap 경로를 반드시 `file:///xrd/store/user/[CERN ID]/...` 형식(file:// 뒤에 /xrd 경로, 즉 슬래시 3개)으로 지정해야 합니다. 이렇게 지정해야 WN에서 /xrd로 결과 파일을 바로 저장합니다.
+
+```bash
+transfer_output_files  = result.root
+## (O) WN에서 /xrd로 바로 저장됩니다.
+transfer_output_remaps = "result.root = file:///xrd/store/user/[CERN ID]/output/result_$(Process).root"
+## (X) file:// 없이 경로만 쓰면 WN에서 바로 저장되지 않습니다.
+# transfer_output_remaps = "result.root = /xrd/store/user/[CERN ID]/output/result_$(Process).root"
+```
+
+> **⚠️ 주의**
+>
+> [CERN ID] 부분은 본인의 CERN ID로 바꾸어 입력하시고, 저장할 디렉토리(위 예시의 output)는 작업 제출 전에 미리 만들어 두시기 바랍니다. 여러 작업의 결과 파일 이름이 겹치지 않도록 $(Process) 등의 변수를 파일 이름에 넣어주세요.
+
+현재 KISTI GSDC Tier-3에는 condor\_submit 관련하여 일반적인 환경과 다른 사항이 있습니다. 통합팜 클러스터 활용을 위해 CMS 사용자들은 accounting\_group="group\_cms" 옵션이 반드시 포함된 JDS를 작성하여야 합니다. 기본 bash 환경에서는 아래와 같이 예약어로 설정된 condor\_submit 명령어를 사용하기 때문에 위 내용을 생략할 수 있지만, bash 스크립트 등에서 제출할 경우에는 JDS에 해당 내용을 꼭 추가해주시기 바랍니다.
+
+```bash
+alias condor_submit='condor_submit -append accounting_group="group_cms"'
+```
+
+#### 작업 실행 OS 지정 (container universe)
+
+UI 서버는 AlmaLinux 9(EL9) 환경입니다. 작업이 UI에서 테스트한 것과 같은 OS 환경에서 실행되도록, JDS에 container universe와 OS 이미지를 지정하여 제출하는 것을 권장합니다. EL9용 CMSSW(el9\_amd64\_\*)는 osgvo-el9 이미지를 사용합니다.
+
+예전 UI(CentOS7)에서 사용하던 condor\_submit6, condor\_submit7 명령어는 더 이상 사용하지 않습니다. SLC6/CentOS7용 구버전 CMSSW(slc6\_\*, slc7\_\*)로 작업해야 하는 경우에는 이미지만 osgvo-el6 / osgvo-el7 로 바꾸어 제출합니다.
+
+```bash
+universe        = container
+## 필요한 OS에 맞게 이미지를 선택합니다. (osgvo-el6 / osgvo-el7 / osgvo-el8 / osgvo-el9)
+container_image = /cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el7:latest
++SingularityBind = "/cvmfs,/etc/condor,/cms,/cms_scratch,/var/lib/condor,/run/user"
+accounting_group = group_cms
+```
+
+전체 예시는 **5. HTCondor를 이용한 배치 작업 수행** 장의 submit.jds를 참고하시기 바랍니다. 같은 방식으로 이미지를 바꾸면 ubuntu 등 다른 OS 환경으로도 작업 제출이 가능합니다.
+
+---
+
+## 5. HTCondor를 이용한 배치 작업 수행
+
+*이 페이지에서는 HTCondor를 이용하여 작업을 제출하고 관리하는 방법을 알려드립니다.*
+
+### CMSSW 작업환경 구축
+
+이 예제에서는 ZZ 샘플을 이용하여 분석 작업을 실행할 예정입니다. 해당 데이터 샘플을 살펴보고 어떠한 작업 환경을 구축해야할지 확인을 해야 합니다.
+
+#### 데이터 파일 확인하기
+
+ZZ샘플 데이터 파일 한개를 사용하여 데이터셋 정보를 확인합니다. 해당 파일의 위치는 다음과 같습니다.
+
+> /xrd/store/mc/RunIIFall17NanoAODv4/ZZ\_TuneCP5\_13TeV-pythia8/NANOAODSIM/PU2017\_12Apr2018\_Nano14Dec2018\_102X\_mc2017\_realistic\_v6-v1/30000/E13A1753-58AD-2E4A-9D47-4BA07BB3FD64.root
+
+CMS에서 사용되는 LFN(Logical File Name) 주소는 반드시 "**/store**"로 시작됩니다. 위에서는 /xrd만 빼면 됩니다. 해당 LFN은 어느 사이트에서도 동일합니다.
+
+위 파일의 DataSet 및 Release 정보를 확인해봅시다.
+
+```bash
+### 임의의 CMSSW 작업 공간에서 cmsenv를 수행한 후,
+dasgoclient --query "dataset file=/store/mc/RunIIFall17NanoAODv4/ZZ_TuneCP5_13TeV-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/30000/E13A1753-58AD-2E4A-9D47-4BA07BB3FD64.root"
+```
+
+> /ZZ\_TuneCP5\_13TeV-pythia8/RunIIFall17NanoAODv4-PU2017\_12Apr2018\_Nano14Dec2018\_102X\_mc2017\_realistic\_v6-v1/NANOAODSIM
+
+```bash
+ dasgoclient --query "release file=/store/mc/RunIIFall17NanoAODv4/ZZ_TuneCP5_13TeV-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/30000/E13A1753-58AD-2E4A-9D47-4BA07BB3FD64.root"
+```
+
+> \["CMSSW\_10\_2\_9"]
+
+해당 파일의 데이터셋과 CMSSW 버전을 확인하였습니다. CMSSW의 버전이 10\_2\_9 이므로 작업 공간은 이 버전과 비슷하거나 살짝 높아야 합니다. 여기서는 10\_2\_9 버전으로 작업을 진행하겠습니다.
+
+```bash
+cmsrel CMSSW_10_2_9
+```
+
+> Waiting for release information to be obtained via [https://cmssdt.cern.ch/SDT/releases.map?release=CMSSW\_10\_2\_9\&architecture=slc7\_amd64\_gcc700\&scram=V2\_2\_9\_pre04\&releasetop=/cvmfs/cms.cern.ch/slc7\_amd64\_gcc700/cms/cmssw/CMSSW\_10\_2\_9](https://cmssdt.cern.ch/SDT/releases.map?release=CMSSW_10_2_9\&architecture=slc7_amd64_gcc700\&scram=V2_2_9_pre04\&releasetop=/cvmfs/cms.cern.ch/slc7_amd64_gcc700/cms/cmssw/CMSSW_10_2_9) (timeout in 7s) WARNING: Developer's area is created for non-production architecture slc7\_amd64\_gcc700. **Production architecture for this release is slc6\_amd64\_gcc700.**
+
+위 메시지를 참고하여 사용 중인 UI 서버(cms-ui.sdfarm.kr, AlmaLinux 9)에서 SLC6 컨테이너 환경으로 들어갑니다. 또한, SCRAM\_ARCH=slc6\_amd64\_gcc700 환경변수를 이용하여 작업공간을 생성하고 src 디렉토리로 이동합니다.
+
+```bash
+cmssw-el6
+SCRAM_ARCH=slc6_amd64_gcc700 cmsrel CMSSW_10_2_9
+cd CMSSW_10_2_9
+cd src
+cmsenv
+```
+
+### KISTIBatch 실습 프로그램 다운로드
+
+HTCondor를 이용한 실습을 수행하기 위하여 간단한 CMSSW 분석 작업 예제를 다운로드합니다.
+
+```bash
+git clone https://github.com/geonmo/KISTIBatch.git
+```
+
+```
+Cloning into 'KISTIBatch'...
+remote: Enumerating objects: 72, done.
+remote: Counting objects: 100% (72/72), done.
+remote: Compressing objects: 100% (58/58), done.
+remote: Total 87 (delta 39), reused 37 (delta 14), pack-reused 15
+Receiving objects: 100% (87/87), 21.25 KiB | 109.00 KiB/s, done.
+Resolving deltas: 100% (41/41), done.
+
+(base) [geonmo@ui20 src]$ ls KISTIBatch/
+LFNTool.py README.md filedialog.py filelist.txt getZMass.py gui.py run.sh setup.sh submit.jds test_LFNTool.py
+```
+
+각 파일들의 세부 설명은 GitHub 페이지를 참고해주시기 바랍니다.
+
+filstlist.txt 파일은 dasgoclient를 이용하여 생성할 수 있습니다. 다음 명령어를 참고해주시기 바랍니다.
+
+```
+## 파일 리스트 추출
+dasgoclient --query="file dataset=/ZZ_TuneCP5_13TeV-pythia8/RunIIFall17NanoAODv4-PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/NANOAODSIM" --limit 0 > filelist.txt
+## Prefix 추가. 데이터 파일의 위치를 알고 있다면 prefix에 해당 센터의 xrootd 경로를 넣으시면 됩니다.
+sed -i 's/^/root:\/\/cmsxrootd.fnal.gov\//g' filelist.txt
+### T3_KR_KISTI의 경우,
+## sed -i 's/^/\/xrd/g' filelist.txt
+```
+
+#### 실습 코드에 관한 설명
+
+해당 실습 코드는 getZMass.py 라는 분석 코드를 각 WN 머신에서 수행하게 됩니다. 이 때, 해당 분석코드는 첫번째 인자로 데이터 파일을 입력 받습니다.
+
+```
+./getZMass.py /xrd/store/mc/RunIIFall17NanoAODv4/ZZ_TuneCP5_13TeV-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/30000/8DC8188D-246C-6D41-A24A-78C0CBBC6F17.root
+```
+
+```
+(base) [geonmo@ui10 KISTIBatch]$ ls -l *.root
+-rw-r--r--. 1 geonmo geonmo 3780 Sep 2 14:05 zcandmass.root
+```
+
+#### HTCondor 작업 제출 명세 작성
+
+HTCondor에 작업을 동시(concurrent)에 실행시키려면 HTCondor 문법에 맞게 작업 제출 파일을 작성하여야 합니다. 해당 제출 명세의 예제로 submit.jds 파일을 동봉하였습니다.
+
+**📄 submit.jds**
+```bash
+batch_name = kisti batch test
+executable = run.sh
+universe = container
+
+## 작업 공간을 만든 OS(SLC6, CMSSW_10_2_9)에 맞추어 이미지를 지정합니다.
+container_image = /cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el6:latest
+getenv = True
+arguments = $(DATAFile)
+
+transfer_input_files = getZMass.py , /tmp/x509up_u556800422, LFNTool.py
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+output = job_$(Process).out
+error = job_$(Process).err
+log = condor.log
+
+transfer_output_files = zcandmass.root
+transfer_output_remaps = "zcandmass.root = zcandmass_$(Process).root"
+accounting_group = group_cms
++SingularityBind = "/cvmfs,/etc/condor,/cms,/cms_scratch,/var/lib/condor,/run/user"
+queue DATAFile from filelist.txt
+```
+
+위 작업은 filelist.txt을 읽어 한줄씩 $(DATAFile) 변수에 대입하며 하나씩 실행됩니다. 따라서 filelist.txt에 적힌 파일 개수만큼 작업이 제출됩니다. (예: 입력 파일이 3개이면 3개의 작업)
+
+> **💡 참고**
+>
+> 해당 작업이 제출될 때마다 $(Process)가 1씩 증가하게 됩니다.
+
+WN에서 run.sh 스크립트를 통해 실행이 되며 인자로 $(DATAFile)이 입력됩니다. 이 때, run.sh는 CMSSW 실행을 위한 환경 설정과 ./getZMass.py을 실행합니다.
+
+accounting\_group은 통합팜에서 작업을 실행하기 위해 필요합니다.
+
+container universe는 apptainer 컨테이너 런타임 활용을 위해서 사용됩니다. 사용되는 이미지는 .sif 포맷이나 일반 디렉토리(혹은  /cvmfs)를 지정할 수 있습니다. 이 예제는 SLC6 환경(cmssw-el6)에서 작업 공간을 만들었으므로 osgvo-el6 이미지를 사용합니다. EL9용 CMSSW로 작업 공간을 만들었다면 osgvo-el9 이미지를 지정하세요.
+
+> **💡 참고**
+>
+> 위 예시의 결과 파일(zcandmass\_$(Process).root)을 /xrd에 바로 저장하려면 transfer\_output\_remaps 경로를 `"zcandmass.root = file:///xrd/store/user/[CERN ID]/zcandmass_$(Process).root"` 처럼 file:/// 형식으로 지정해야 합니다. 자세한 내용은 **4. 배치 작업 사용하기 (HTCondor 기초)** 장의 '결과 파일을 /xrd에 바로 저장하기'를 참고하시기 바랍니다.
+
+### 참고문헌
+
+1. KISTIBatch GitHub Page : [https://github.com/geonmo/KISTIBatch](https://github.com/geonmo/KISTIBatch)
+
+---
+
+## 6. create-batch를 이용한 배치 작업 수행
+
+*create-batch는 경희대 고정환 교수님이 개발 및 유지보수를 하고 계신 작업 제출 프로그램입니다. 이 프로그램은 기존 HTCondor 자체를 사용한 작업 제출보다 편리하게 작업을 수행할 수 있습니다.*
+
+### 1. 프로그램 획득
+
+create-batch는 github를 통해 다운로드 받으실 수 있습니다.
+
+```bash
+git clone https://github.com/cms-kr/hep-tools.git
+```
+
+다운로드된 스크립트 중 create-batch를 이용하시면 됩니다. $HOME/bin 디렉토리로 복사해두시면 매우 편리하게 사용이 가능합니다.
+
+```bash
+cp hep-tools/create-batch $HOME/bin
+```
+
+### 2. 사용방법 안내
+
+create-batch는 최신 트렌드에 맞쳐 **cmsRun 작업**과 **일반 bash를 통한 스크립트 작업** 모두 **대응 가능**합니다. 다음 도움말을 참고하여 cmsRun인지 일반 스크립트인지에 따라 적절하게 사용하시기 바랍니다.
+
+```bash
+(base) [geonmo@ui10 hep-tools]$ ./create-batch  
+./create-batch  : create pbs/condor jobs 
+Usage: create-batch cmsRun --cfg CONFIG_cfg.py --jobName JOBNAME --fileList fileList.txt --maxFiles MAXFILE        
+
+       create-batch bash --cfg YOUR_BASH_script.sh --jobName JOBNAME --nJobs NJOBS --transferFiles YOUR_OUTPUT_FILES  
+Mandatory options :   
+       --jobName  NAME                         Name of job   
+       --fileList DATA_FILES            File list text file   
+       --maxFiles N                     Maximum number of files per job   
+       --nJobs    N                     Number of Job sections   
+       --cfg      CONFIG_FILE_cfg.py    Configuration file  
+Optional :   
+       --queue QUEUE_NAME               Set the batch queue name   
+       --secondFileList DATA_FILES      Secondary file list text file   
+       -n                               Do not submit jobs to batch   
+       --transferDest OUTPUT_LOCATION   OUTPUT DIRECTORY (/store will be assumed to SE)   
+       -G                               Disable Grid certificate   
+       --maxEvent N                     Maximum number of events per job (-1 by default)   
+       --transferFiles                  Additional files to transfer   
+       -T                               Automatically transfer new files by archiveing them   
+       --customise CUSTOMISE_cfg.py     Configuration file for customization   
+       --args                           general arguments   
+       --firstRun N                     For MC: run number   
+       -B                               Rebuild whole package before job starts  
+Optional, condor-specific :   
+       --blacklist HOST1,HOST2,...      Remove specific hosts   
+       --whitelist HOST1,HOST2,...      Use specific hosts
+```
+
+\--whitelist 혹은 --blacklist 옵션을 통하여 특정 머신에서만 작업이 돌도록 지정하거나 해당 머신을 제외하고 작업을 수행하도록 지정할 수 있습니다. (--blacklist cms-t3-wn3001.sdfarm.kr)
+
+### 참고문헌
+
+1. [https://github.com/cms-kr/hep-tools](https://github.com/cms-kr/hep-tools)
+
+---
+
+## 7. 데이터 전송 및 데이터셋 요청
+
+*데이터 파일을 전송하는 방법과 CMS 데이터셋 전송을 요청하는 방법을 알려드립니다.*
+
+**3. CMS Tier-3 컴퓨팅 환경** 장에 대한 설명 중 WebDAV와 xroot 프로토콜에 관한 설명을 드렸습니다. 연구자 분들은 언제 어느때이건 본인에게 필요한 파일을 Tier-3로 전송할 수 있습니다.
+
+### 1. 데이터 전송
+
+#### 데이터 파일의 위치를 정확히 알 때
+
+데이터 파일의 위치를 정확하게 알고 있을 경우에는 데이터 전송을 매우 빠르고 쉽게 처리할 수 있습니다. 다음 명령어로 데이터를 전송할 수 있습니다.
+
+xrdcp root://\[source of data file]//\[Path of source data file \[Dest]
+
+```bash
+xrdcp root://eoscms.cern.ch//store/mc/SAM/GenericTTbar/AODSIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v1/00000/CE860B10-5D76-E711-BCA8-FA163EAA761A.root .
+
+## xrdcp는 -r (하위 디렉토리 포함) 기능이 지원됩니다.
+xrdcp root://eoscms.cern.ch//store/mc/SAM/GenericTTbar/AODSIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v1/00000 .
+
+```
+
+> **⚠️ 주의**
+>
+> 수신과 송신처는 local 디렉토리 혹은 XRootD 서버여야 합니다.
+
+#### 데이터 파일의 위치를 알지 못할 때
+
+데이터 파일의 위치를 알지 못할 때에는 데이터의 위치를 찾아서 전송을 하거나 데이터 파일의 위치와 상관 없이 CMS AAA(Any Data, Anytime, Anywhere) 기능을 이용하여 데이터를 전송할 수 있습니다.
+
+##### 데이터 파일 찾기
+
+데이터 파일의 위치를 찾기 위해서는 dasgoclient 혹은 DAS 홈페이지를 사용하시는 것이 가장 편리합니다.
+
+```bash
+dasgoclient --query="site file=/store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano1June2019_102X_mc2017_realistic_v7-v1/60000/04323B9F-4B66-2D44-89DE-644E8C48246D.root"
+
+```
+
+```
+T1_RU_JINR_Disk
+T1_US_FNAL_Buffer
+T1_US_FNAL_MSS
+T2_KR_KISTI
+T2_US_Purdue
+T2_US_Wisconsin
+T3_KR_KISTI
+```
+
+파일이 저장된 사이트를 확인하였습니다. 아래 CMS AAA 기능을 이용하면 사이트 위치와 상관없이 파일을 전송할 수 있습니다.
+
+##### 데이터 자동 탐색 기능(CMS AAA) 사용하기
+
+CMS AAA 기능을 사용하면 사이트의 탐색 없이 파일을 전송할 수 있습니다. 고정된 접두어(root://cmsxrootd.fnal.gov)를 사용하여 파일을 전송합니다.
+
+```
+xrdcp root://cmsxrootd.fnal.gov//store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano1June2019_102X_mc2017_realistic_v7-v1/60000/04323B9F-4B66-2D44-89DE-644E8C48246D.root .
+```
+
+> **💡 참고**
+>
+> 현재 CMS AAA는 가장 빠른 사이트를 검색하는 등의 추가적인 기능이 제공되지 않고 있습니다. 따라서, 국내에 있는 다른 사이트에서 파일을 전송하고 싶어도 유럽이나 미국에서 파일을 전송할 가능성이 있습니다. 전송 받을 파일이 많다면 아래 '2. 데이터셋 전송 요청'의 Rucio를 이용하여 데이터셋 전송을 요청하시기 바랍니다.
+
+### 2. 데이터셋 전송 요청
+
+##### Rucio (For Public Dataset)
+
+현재 rucio 명령어를 통해 데이터를 전송하려면 T3\_KR\_KISTI에 대한 공간 쿼터를 할당 받아야 합니다. 혹시 쿼터가 필요한 분들은 다음 정보를 포함하여 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 요청하시기 바랍니다.
+
+1. 요청하는 사용자의 "CERN Computing ID"
+2. 요청하는 쿼터 용량
+3. 쿼터 요청하는 사이트 (T2 또는 T3)
+
+> **❗ 중요**
+>
+> 개인 계정으로 rucio 쿼터를 받아 사용하시는 경우, 서비스를 더 이상 이용하지 않게 되면 **반드시 본인이 추가한 모든 rule을 삭제**해야 합니다. 개인 계정으로 만든 rule은 사이트 관리자도 삭제하거나 변경할 수 없기 때문에, 사용자가 직접 지우지 않으면 데이터와 쿼터가 계속 남게 됩니다. (삭제 방법은 아래 '3. 전송 요청한 데이터셋 삭제 (쿼터 회복)' 참고)
+>
+> 이러한 관리가 부담되신다면 개인 계정 대신 공용 계정인 **t3_kr_kisti_local_users** 로 rule을 추가하시기 바랍니다. RUCIO_USER 환경변수를 t3_kr_kisti_local_users 로 지정한 후 rule을 추가하면 됩니다.
+>
+> 단, t3_kr_kisti_local_users 계정은 해당 CERN e-group에 소속된 사용자만 사용할 수 있습니다. e-group 가입이 필요하신 분은 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 CERN ID와 함께 문의해 주시기 바랍니다.
+
+```bash
+## 공용 계정(t3_kr_kisti_local_users)으로 rule 추가 (e-group 소속 사용자만 가능)
+export RUCIO_USER=t3_kr_kisti_local_users
+rucio add-rule cms:[DATASET] 1 T3_KR_KISTI
+```
+
+* 다음 명령어로 rucio 명령어를 사용 가능하도록 설정합니다. (rucioenv 명령어로 대체 가)
+
+```
+###CMSSW 디렉토리 내에서 cmsenv를 하였을 경우 작동 안될 가능성 있음.
+source /cvmfs/cms.cern.ch/cmsset_default.sh 
+source /cvmfs/cms.cern.ch/rucio/setup.sh 
+export RUCIO_USER=[CERN ID]
+voms-proxy-init --voms cms
+
+### CERN과 KISTI ID가 같다면 다음 명령어로 바로 적용 가능합니다.
+rucioenv 
+```
+
+* 아래 명령어로 데이터셋 전송 요청을 진행합니다.
+
+```
+### 쿼터가 있을 경우
+rucio add-rule cms:[DATASET] 1 T3_KR_KISTI
+
+## 쿼타가 없어서 데이터셋마다 확인이 필요할 경우,
+rucio add-rule --ask-approval cms:[DATASET] 1 T3_KR_KISTI
+```
+
+* 아래 명령어로 데이터셋 전송 상태를 확인행합니다
+
+```
+rucio list-rules --account geonmo
+```
+
+* 출력형식
+  * \[rucio ID as HexCode] \[User] cms:\[DataSet] \[Status/ OK, REPL,STUCK] \[Tier Center] \[COPIES]
+    * OK : 전송완료
+    * REPL : 전송 중
+    * STUCK : 전송 실패 혹은 전송 작업 승인 대기
+
+> 20e8a18cb7e04a75b8d8106baf4ece01 geonmo cms:/gluinoGMSB\_M3000\_ctau10000p0\_TuneCP2\_13TeV\_pythia8/RunIISummer16NanoAODv7-PUMoriond17\_Nano02Apr2020\_102X\_mcRun2\_asymptotic\_v8-v1/NANOAODSIM OK\[9/0/0] T3\_KR\_KISTI 1
+
+* 총 9개의 파일 중 9개 전송 완료 \[OK:9, REPL: 0, STUCK:0]
+
+### 3. 전송 요청한 데이터셋 삭제 (쿼터 회복)
+
+rucio 로 전송한 데이터셋은  rucio delete-rule 명령어로 삭제가 가능합니다. 단, 다른 사용자가 같은 데이터셋을 신청한 상태라면 데이터셋 자체는 삭제되지 않습니다. 하지만, 쿼터는 복구되므로 필요한 쿼터를 확보할 수 있습니다.
+
+> **❗ 중요**
+>
+> 개인 계정으로 rucio를 사용하다가 서비스를 더 이상 이용하지 않게 되는 경우, 아래 방법으로 `rucio list-rules --account [CERN ID]` 에 나오는 **모든 rule을 반드시 삭제**해 주시기 바랍니다. 개인 계정의 rule은 사이트 관리자도 삭제할 수 없습니다. 공용 계정(t3_kr_kisti_local_users)으로 추가한 rule은 이 절차가 필요하지 않습니다.
+
+```bash
+[geonmo@ui20 ~]$ rucio list-rules --account geonmo
+ID                                ACCOUNT    SCOPE:NAME
+                                    STATE[OK/REPL/STUCK]    RSE_EXPRESSION      COPIES  EXPIRES (UTC)    CREATED (UTC)
+--------------------------------  ---------  ------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------  ----------------------  ----------------  --------  ---------------  -------------------
+2de8f9060ac94da38b898d9fb267d16f  geonmo     cms:/StealthSHH_2t4b_mStop-1200_mSo-100_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18NanoAODv7-Nano02Apr2020_102X_upgrade2018_realistic_v21-v1
+/NANOAODSIM                         OK[8/0/0]               T3_KR_KISTI              1                   2020-08-12 01:30:18
+
+[geonmo@ui20 ~]$ rucio delete-rule 2de8f9060ac94da38b898d9fb267d16f
+```
+
+### 4. rucio 사용량 및 쿼터 확인
+
+rucio를 호라용하실 때 사용량 및 쿼터 용량 확인이 필요하신 경우가 있습니다. 아래와 같이 확인하시기 바랍니다.
+
+#### (1) 쿼터 확인
+
+```bash
+[geonmo@ui20 ~]$ rucio list-account-limits geonmo                                                                                                        
++-------------+-----------+                                                                                                                                  
+| RSE         | LIMIT     |                                                                                                                                  
+|-------------+-----------|                                                                                                                                  
+| T2_KR_KISTI | 20.000 TB |
+| T3_KR_KISTI | 20.000 TB |
++-------------+-----------+
++------------------+---------+
+| RSE EXPRESSION   | LIMIT   |
+|------------------+---------|
++------------------+---------+
+
+```
+
+#### (2) 사용량 확인
+
+```bash
+[geonmo@ui20 ~]$ rucio list-rse-usage --show-accounts T3_KR_KISTI
+USAGE:
+------
+  used: 16.726 TB
+  rse: T3_KR_KISTI
+  updated_at: 2021-09-08 02:20:32
+  source: expired
+  rse_id: 1983977ffc0e47ffb2b1c4d496a8297f
+------
+  used: 4.157 TB
+  rse: T3_KR_KISTI
+  updated_at: 2021-09-08 02:20:07
+  source: obsolete
+  rse_id: 1983977ffc0e47ffb2b1c4d496a8297f
+------
+  files: 78660
+  used: 109.455 TB
+  rse: T3_KR_KISTI
+  updated_at: 2021-09-02 06:46:12
+  source: rucio
+  per account:
+  ------
+    account: sync_t3_kr_kisti       used: 64.192 TB                 percentage: 58.65                                                                      
+  ------
+    account: jlee                   used: 12.457 TB                 percentage: 11.38                                                                      
+  ------
+    account: geonmo                 used: 7.077 TB                  percentage: 6.47                                                                       
+  ------
+    account: heewon                 used: 4.831 TB                  percentage: 4.41                                                                       
+  ------
+    account: yhoonlee               used: 3.691 TB                  percentage: 3.37                                                                       
+  ------
+    account: jichoi                 used: 2.658 TB                  percentage: 2.43                                                                       
+  ------
+    account: soohwan                used: 2.204 TB                  percentage: 2.01                                                                       
+  ------
+    account: mchoi                  used: 1.995 TB                  percentage: 1.82                                                                       
+  ------
+    account: yjeong                 used: 1.507 TB                  percentage: 1.38                                                                       
+  ------
+    account: haoh                   used: 128.632 GB                percentage: 0.12                                                                       
+  ------
+    account: gylee                  used: 50.821 GB                 percentage: 0.05                                                                       
+  ------
+    account: dakang                 used: 10.063 GB                 percentage: 0.01                                                                       
+  ------
+  rse_id: 1983977ffc0e47ffb2b1c4d496a8297f
+------
+  used: 15.442 GB
+  rse: T3_KR_KISTI
+  updated_at: 2021-09-02 15:00:13
+  source: unavailable
+  rse_id: 1983977ffc0e47ffb2b1c4d496a8297f
+------
+
+```
+
+---
+
+## 8. 스토리지 접근 방법
+
+*/xrd(장기 보관) 스토리지에 저장된 데이터에 접근하는 방법에 대하여 설명드립니다.*
+
+### 데이터 사용량 확인
+
+Google Sheet를 이용하여 사용자들의 데이터 사용량 확인이 가능합니다. 아래 링크를 확인하시기 바랍니다.
+
+[구글 시트 모니터링 페이지](https://docs.google.com/spreadsheets/d/1mk335AFIkW7X4Pod8pecfTw0m1-S_NTjNkxFzHEwAL0/edit#gid=1404507412)
+
+### 데이터 쓰기 방법
+
+UI 서버 및 WN의 /xrd 공간을 확인하시면 데이터 파일들의 경로와 위치 정보를 아실 수 있습니다. 개인 데이터는 /xrd/store/user/[CERN ID] 에 저장하시고, /xrd/store/mc · data · himc 같은 공용 데이터셋 공간에는 파일을 쓰거나 삭제하지 마시기 바랍니다. 전체 디렉토리 구조는 아래 '디렉토리 정보'를 참고하시기 바랍니다.
+
+##### cp 명령어로 복사하기
+
+기존 XRootD 스토리지(/xrootd)가 Lustre 볼륨(/xrd)으로 변경되었기 때문에, 장기 보관할 데이터는 일반 파일처럼 cp 명령어로 /xrd 에 복사하시면 됩니다.
+
+```bash
+cp -r /cms/ldap_home/[ID]/migration_test /xrd/store/user/[CERN ID]/
+ls -l /xrd/store/user/[CERN ID]/migration_test
+```
+
+##### 데이터 접근 방식
+
+WN에서 스토리지 데이터를 접근하는 방법에 대해서 기술합니다.
+
+##### (1) CMS T3\_KR\_KISTI 데이터 접근
+
+**▶ ROOT**
+```
+## 클러스터 내부에서는 /xrd 경로로 바로 접근
+root -l /xrd/store/user/[CERNID]/~~.root
+or
+datafile = TFile::Open("/xrd/store/user/~~");
+```
+
+**▶ PyROOT**
+```
+## In pyROOT,
+datafile = TFile.Open("/xrd/store/user/~~")
+```
+
+**▶ CMSSW**
+```
+## T3 데이터의 경우, LFN 및 /xrd 로컬 경로(file: 접두어) 접근 둘다 가능합니다.
+process.source = cms.Source("PoolSource",                            
+            fileNames = cms.untracked.vstring(
+            '/store/user/~~~.root',
+            'file:/xrd/store/user/~~.root',
+    )
+)
+```
+
+##### (2) CMS T2\_KR\_KISTI 데이터 접근
+
+**▶ ROOT**
+```
+## XRootD 프로토콜로 접근
+root -l root://cms-t2-se01.sdfarm.kr:1096//store/user/[CERNID]/~~.root
+or
+datafile = TFile::Open("root://cms-t2-se01.sdfarm.kr:1096//store/user/~~");
+```
+
+**▶ PyROOT**
+```
+## In pyROOT,
+datafile = TFile.Open("root://cms-t2-se01.sdfarm.kr:1096//store/user/~~")
+```
+
+**▶ CMSSW**
+```
+## T2 데이터의 경우, XRootD PFN 접근 가능합니다.
+process.source = cms.Source("PoolSource",                            
+            fileNames = cms.untracked.vstring(
+            'root://cms-t2-se01.sdfarm.kr:1096//store/user/~~.root',
+    )
+)
+```
+
+### 디렉토리 정보
+
+##### /xrd/store/mc
+
+* 위 공간은 CMS DataSet 중 MC 샘플들이 저장되는 공간입니다.
+
+##### /xrd/store/data
+
+* 위 공간은 CMS Dataset 중 Real Data가 저장되는 공간입니다.
+
+##### /xrd/store/himc
+
+* 위 공간은 HeavyIon MC 샘플이 저장됩니다.
+
+> **❗ 중요**
+>
+> 위 공간은 Rucio를 이용하여 데이터셋을 신청하여 파일을 전송하실 수 있습니다. (**7. 데이터 전송 및 데이터셋 요청** 장 참고) 그외에 일반 유저가 해당 디렉토리에 파일을 쓰거나 삭제하지 않도록 주의해주시기 바랍니다.
+>
+> 다시 한번 말씀드리지만, 해당 공간의 파일을 수정하거나 삭제하지 않도록 주의를 기울여주시기 바랍니다.
+
+##### /xrd/store/user
+
+* 위 공간은 개별 사용자들의 데이터 샘플을 장기 보관하는 공간입니다.
+* 각 사용자들은 클러스터 내부(UI, WN)에서 cp 명령어로 /xrd/store/user/[CERN ID] 디렉토리에 데이터를 복사하거나, 외부에서는 gfal-copy, xrdcp 명령어를 사용할 수 있습니다.
+
+##### /xrd/store/group
+
+위 공간은 KCMS 연구자들이 생산한 공용 데이터들을 저장하고 있습니다.
+
+---
+
+## 9. CRAB3 사용 관련
+
+*KISTI Tier3에 CRAB3를 사용할 때 주의사항에 관해 알려드립니다.*
+
+### CRAB3 설정
+
+CRAB3의 자세한 설정은 [CRAB3 페이지](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial#Output\_dataset\_publication) 를 참고하시기 바랍니다. 여기서는 주요내용에 대해서만 다룹니다.
+
+#### CRAB3 결과를 KISTI에 저장하기
+
+Tier-3에 결과파일을 저장하기 위해서는 아래 옵션을 사용합니다. 저장된 데이터셋은 /xrd/store/user/\[CERN ID] 밑에서 확인하실 수 있습니다.
+
+**📄 crabConfig.py**
+```python
+config.General.transferOutputs = True
+config.Site.storageSite = T3_KR_KISTI
+# T2에 저장하려면
+config.Site.storageSite = T2_KR_KISTI
+```
+
+> **❗ 중요**
+>
+> T3\_KR\_KISTI에 저장된 데이터는 더이상 CRAB 작업을 수행할 수 없습니다. CRAB 활용이 필요하다면 해당 데이터셋을 반드시 T2\_KR\_KISTI로 저장하세요.
+
+#### 2차 작업이 필요한 경우
+
+2차 작업이 필요할 경우 해당 데이터셋을 반드시 publish하여야 합니다. 그렇지 않으면 CRAB에서는 사용이 불가능합니다.
+
+**📄 crabConfig.py**
+```python
+config.General.transferOutputs = True
+config.Site.storageSite = T2_KR_KISTI
+config.Data.publication = True
+config.Data.outputDatasetTag = '<DATASET's NAME>'
+```
+
+생성된 데이터셋을 대상으로 작업을 돌릴 경우에는 DBS Instance를 "global"에서 "phys03"으로 변경해야 합니다.
+
+**📄 crabConfig_2nd.py**
+```python
+config.Data.inputDataset = '<DATASET's NAME>/USER'
+config.Data.inputDBS = 'phys03'
+```
+
+---
+
+## 10. 빅데이터 분석 환경 구축하기
+
+*최근들어 빅데이터 분석 시스템을 이용한 CMS 데이터 분석을 활용하시는 사용자분들이 늘어나고 있습니다. 이에 따라, 해당 환경 구축 방법에 대해 알려드립니다.*
+
+### Apptainer를 이용한 PyTorch 사용하기
+
+pytorch 사용을 위한 NGC 컨테이너 사용을 추천드립니다.
+
+```
+## 컨테이너 이미지 다운로드 (/tmp 20GB 이상 필요)
+apptainer pull docker://nvcr.io/nvidia/pytorch:23.11-py3
+apptainer shell --nv pytorch_23.11-py3.sif
+```
+
+### Apptainer를 이용한 TensorFlow 사용하기
+
+현재 제공되는 GPU 서버에서는 tensorflow를 바로 실행하실 수 없습니다. Apptainer(구 Singularity) 컨테이너 환경을 추천드립니다.
+
+```
+## CMS GPU 서버에서 실행하세요.
+apptainer pull docker://nvcr.io/nvidia/tensorflow:23.11-tf2-py3
+apptainer shell --nv tensorflow_23.11-tf2-py3.sif
+```
+
+HTCondor를 이용한 작업 제출은 다음과 같습니다.
+
+```
+# Job description file for condor job cat_jpsi_ftl_full
+jobbatchname = GPU test
+executable = gpu_test.sh
+universe   = container
+container_image = tensorflow_23.11-tf2-py3.sif
+arguments  = $(Process)
+log = condor.log
+
+getenv     = True
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+output = job_$(Process).out
+error = job_$(Process).err
+
+#+SingularityBindCVMFS = True
+
+request_cpus=1
+request_GPUs = 1
+
+queue 1
+```
+
+### 주피터 노트북 환경
+
+주피터 노트북은 CMS GPU 서버에서 써보시는 것을 추천드립니다. (P100 그래픽카드 활용 가능)
+
+본인 컴퓨터에서 8888 -> localhost:8889 로 지정하시고, UI 서버에서 8889번 포트를 GPU서버의 localhost:8888번으로 연결하신 후,  jupyter의 포트 번호를 8888로 여시면 됩니다.
+
+MobaXterm 사용자는 다음 링크를 참조하여 본인 컴퓨터측 설정을 완료하시기 바랍니다. 비슷한 방식으로 putty에서 설정이 가능합니다.  ([https://developyo.tistory.com/84](https://developyo.tistory.com/84))
+
+이후 아래 설정대로 진행하시면 됩니다.
+
+```
+ssh -Y cms-gpu01
+### ssh local tunneling을 통해 간접 접속이 가능합니다.
+# 본인의 데스크탑에서 접속을 하시려면 2중 포트 포워딩을 하세요.
+# ### ui -> cms-gpu01
+# ex) ssh -4 -L 8889:localhost:8888 $USER@cms-gpu01
+```
+
+#### Python 가상환경(venv) 구축
+
+Python 가상환경을 이용하면 일반 사용자 권한으로 Python 패키지를 설치할 수 있습니다. 현재 UI 서버의 기본 Python은 Python 3입니다.
+
+```
+cd $HOME
+python3 -m venv my_workspace
+```
+
+#### 작업 공간에서 Python 패키지 설치
+
+대부분의 경우 해당 패키지들을 pip로 설치하게 됩니다.
+
+```
+cd my_workspace
+source bin/activate
+mkdir $HOME/pip_cache
+TMPDIR=$PWD pip install --cache-dir=$HOME/pip_cache jupyter pandas seaborn torch scikit-learn metakernel pyzmq
+```
+
+#### Jupyter 실행
+
+```
+### 나중에 다시 실행하기 위해서,
+source my_workspace/bin/activate
+jupyter notebook
+## 혹은 포트 개방 후 본인 컴퓨터의 브라우저에서 지정한 포트로 연결하여 사용 가능
+jupyter notebook --no-browser --ip 0.0.0.0 --port XXXX
+```
+
+#### local 컴퓨터에서 접속
+
+제대로 접속이 되었다면 본인 컴퓨터의 브라우저에서 localhost:8888로 접속이 가능합니다.
+
+![Token을 물어봅니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=bigdata-jupyter-token.png)
+
+토큰 정보는 jupyter를 실행할 때 표시되므로 해당 내용을 복사&붙여넣기로 접속이 가능합니다.
+
+---
+
+## 11. FAQ 및 문제 해결
+
+*유저들의 질의사항을 기록하여 비슷한 문제를 겪는 사용자들에게 답을 줄 수 있도록 안내해드리는 페이지입니다.*
+
+#### 1. scram build시 컴파일 에러가 나요!
+
+![컴파일 에러가 발생하는 경우가 있습니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=faq-scram-build-error.png)
+
+위 에러의 경우는 CMSSW framework 디렉토리에서 CMSSW 환경과 sft.cern.ch에 있는 ROOT 환경이 충돌하여 발생하였습니다. 깨끗한 환경변수 상태에서 cmsenv만 진행 후 작업하면 이상이 없습니다.
+
+#### 2. 작업이 끝나지 않아요!
+
+끝날 시간이 되었으나 끝나지 않는 작업의 경우 몇가지를 확인하여야 합니다.
+
+(1) 사용하는 데이터 파일이 외부에 있는 경우,
+
+작업의 CPU 사용률을 확인하면 대략 알 수 있습니다.
+
+```
+[geonmo@ui20 manifests]$ condor_jobstatus runiyal
+ ID         Owner   RemoteHost                    CPUsUsage            
+9100463.0   runiyal slot1@bio-wn3006.sdfarm.kr    0.001307340657177903 
+9100471.0   runiyal slot1@bio-wn3017.sdfarm.kr    0.002598957544583386 
+9100537.0   runiyal slot1@bio-wn3015.sdfarm.kr    0.002616651650138061 
+9100561.0   runiyal slot1@bio-wn3015.sdfarm.kr    0.002691392044219451 
+9100664.0   runiyal slot3@bio-wn3016.sdfarm.kr    0.002509965002770551 
+9100709.0   runiyal slot1@bio-wn3011.sdfarm.kr    0.004661354284485942 
+9101560.0   runiyal slot2@bio-wn3011.sdfarm.kr    0.004759655887460485 
+9101561.0   runiyal slot3@condor-wn1012.sdfarm.kr 0.02173146070995057  
+9101575.0   runiyal slot2@condor-wn1008.sdfarm.kr 0.002791534221159765 
+
+```
+
+분석 데이터 파일이 KISTI가 아니라 외부의 있는 경우 뿐만 아니라 premixing 등에 사용되는 pileup event가 외부 사이트에 있을 경우에도 속도가 매우 떨어지게 됩니다. 해결방법은 해당 데이터들을 KISTI로 전송하는 것입니다. **7. 데이터 전송 및 데이터셋 요청** 장의 Rucio로 데이터셋 전송을 요청하시거나, 어려운 경우 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 문의해 주시기 바랍니다.
+
+(2)  머신 상태가 불량한 경우,
+
+아래처럼 작업의 CPU 사용률이 0.0이면서 같은 머신에서 여러 작업들이 멈쳐 있는 경우라면 해당 머신에 문제가 생긴 것으로 판단할 수 있습니다.
+
+```
+[geonmo@ui20 manifests]$ condor_jobstatus geonmo
+9100560.0   geonmo slot1@condor-wn1016.sdfarm.kr 0.0                  
+9100560.1   geonmo slot1@condor-wn1016.sdfarm.kr 0.0                  
+9100560.2   geonmo slot1@condor-wn1016.sdfarm.kr 0.0                  
+```
+
+#### 3. 패스워드를 리셋하고 싶어요!
+
+패스워드는 GSDC 포털에서 직접 초기화할 수 있습니다. (예전에 사용하던 텔레그램 봇 @GSDCAccountBot은 더 이상 운영하지 않습니다.)
+
+1. 포털 로그인 화면([https://portal.gsdc.kr/login](https://portal.gsdc.kr/login)) 아래의 **[비밀번호 초기화]** 를 클릭합니다. (바로가기: [https://portal.gsdc.kr/reissue/password](https://portal.gsdc.kr/reissue/password))
+2. 화면의 안내에 따라 초기화를 진행합니다.
+
+> **💡 참고**
+>
+> OTP를 분실하신 경우에는 같은 화면의 **[OTP 초기화]** 를, 비밀번호와 OTP를 모두 초기화해야 하는 경우에는 **[비밀번호 및 OTP 초기화]** 를 이용하시기 바랍니다.
+
+#### 4. /xrd/store/user/\[ID] 디렉토리가 없어요!
+
+/xrd/store/user/\[ID] 디렉토리는 CRAB 작업 결과를 T3\_KR\_KISTI에 저장하면 자동으로 생성됩니다. (**9. CRAB3 사용 관련** 장 참고) CRAB을 사용하지 않는데 디렉토리가 없다면 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 생성을 요청해 주시기 바랍니다.
+
+#### 5. UI 서버에서 작업을 하려고 하는데 타이핑도 늦어질 정도로 느려요!
+
+현재까지 알려진 속도 지연현상의 원인은 아래와 같습니다.
+
+**(1) CPU 과다 사용**
+
+top 명령어로 CPU 사용량을 확인하면 쉽게 알 수 있습니다. UI 서버는 cms-ui.sdfarm.kr 한 대로 운영됩니다. (기존 ui20은 2026년 11월 30일 종료 예정) 따라서 특정 사용자가 자원을 과도하게 사용하고 있다면 해당 계정명을 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 관리자에게 알려주시기 바랍니다. 확인 후 조치하겠습니다.
+
+**(2) HOME 디렉토리 과다 사용**
+
+홈디렉토리에 과도한 쓰기 작업이 실행되면 모든 사용자들의 디스크 쓰기 작업에 영향을 주게 됩니다. 대개 잠깐 기다리면 해결이 됩니다만, 치명적인 문제가 발생할 수도 있기 때문에 아래 내용을 확인한 후 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 관리자에게 알려주시기 바랍니다.
+
+아래 명령 실행 후 shadow가 너무 많은 경우(200개 이상)에는 티켓으로 알려주시기 바랍니다.
+
+```
+ps -ef | grep condor_shadow 
+```
+
+쓰기 작업의 특성상 지연 현상이 장기간 이어지는 경우는 많지 않습니다. 따라서, 조금만 기다려주시면 해당 이슈가 사라질 겁니다. 대량의 쓰기 작업을 필요로 하시는 사용자 분들께서는 되도록 /cms\_scratch 등 사용자 홈디렉토리와 연관이 적은 스토리지를 활용해주시기를 요청드립니다.
