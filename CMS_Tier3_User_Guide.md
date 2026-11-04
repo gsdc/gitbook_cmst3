@@ -678,17 +678,27 @@ JDS 파일을 이용하여 작업을 제출할 때는 아래 명령어로 실행
 condor_submit template.jds
 ```
 
-현재 KISTI GSDC Tier-3에는 condor\_submit 관련하여 일반적인 환경과 다른 사항이 몇가지 존재합니다. 통합팜 클러스터 활용을 위해 CMS 사용자들은 accounting\_group="group\_cms" 옵션이 반드시 포함된 JDS를 작성하여야 합니다. 하지만, 기본 bash 환경에서는 예약어로 설정된 명령어를 사용하기 때문에 위 내용을 생략할 수 있습니다. 하지만, bash 스크립트 등을 작성할 경우에는 해당 내용을 꼭 추가해주시기 바랍니다.
+현재 KISTI GSDC Tier-3에는 condor\_submit 관련하여 일반적인 환경과 다른 사항이 있습니다. 통합팜 클러스터 활용을 위해 CMS 사용자들은 accounting\_group="group\_cms" 옵션이 반드시 포함된 JDS를 작성하여야 합니다. 기본 bash 환경에서는 아래와 같이 예약어로 설정된 condor\_submit 명령어를 사용하기 때문에 위 내용을 생략할 수 있지만, bash 스크립트 등에서 제출할 경우에는 JDS에 해당 내용을 꼭 추가해주시기 바랍니다.
 
 ```bash
 alias condor_submit='condor_submit -append accounting_group="group_cms"'
-alias condor_submit6='condor_submit -append accounting_group="group_cms" -append "+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el6:latest\"" -append "+SingularityBindCVMFS=True" -append "+SingularityBind=\"/cvmfs,/cms,/share,/cms_scratch\""'
-alias condor_submit7='condor_submit -append accounting_group="group_cms" -append "+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el7:latest\"" -append "+SingularityBindCVMFS=True" -append "+SingularityBind=\"/cvmfs,/cms,/share,/cms_scratch\""'
 ```
 
-CentOS6용 작업을 던질 때는 condor\_submit6를 7으로 던질 때는 condor\_submit  혹은 condor\_submit7명령어를 사용하면 됩니다.
+#### 작업 실행 OS 지정 (container universe)
 
-조금 내용을 수정하면 ubuntu 환경으로 작업 제출도 가능합니다.
+UI 서버는 AlmaLinux 9(EL9) 환경입니다. 작업이 UI에서 테스트한 것과 같은 OS 환경에서 실행되도록, JDS에 container universe와 OS 이미지를 지정하여 제출하는 것을 권장합니다. EL9용 CMSSW(el9\_amd64\_\*)는 osgvo-el9 이미지를 사용합니다.
+
+예전 UI(CentOS7)에서 사용하던 condor\_submit6, condor\_submit7 명령어는 더 이상 사용하지 않습니다. SLC6/CentOS7용 구버전 CMSSW(slc6\_\*, slc7\_\*)로 작업해야 하는 경우에는 이미지만 osgvo-el6 / osgvo-el7 로 바꾸어 제출합니다.
+
+```bash
+universe        = container
+## 필요한 OS에 맞게 이미지를 선택합니다. (osgvo-el6 / osgvo-el7 / osgvo-el8 / osgvo-el9)
+container_image = /cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el7:latest
++SingularityBind = "/cvmfs,/etc/condor,/cms,/cms_scratch,/var/lib/condor,/run/user"
+accounting_group = group_cms
+```
+
+전체 예시는 **5. HTCondor를 이용한 배치 작업 수행** 장의 submit.jds를 참고하시기 바랍니다. 같은 방식으로 이미지를 바꾸면 ubuntu 등 다른 OS 환경으로도 작업 제출이 가능합니다.
 
 ---
 
