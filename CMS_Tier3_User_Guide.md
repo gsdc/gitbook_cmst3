@@ -1586,28 +1586,14 @@ jupyter notebook --no-browser --ip 0.0.0.0 --port XXXX
 
 #### 3. 패스워드를 리셋하고 싶어요!
 
-패스워드를 리셋하려면 텔레그램에서 @GSDCAccountBot을 친구 추가해주세요.
+패스워드는 GSDC 포털에서 직접 초기화할 수 있습니다. (예전에 사용하던 텔레그램 봇 @GSDCAccountBot은 더 이상 운영하지 않습니다.)
 
-* GSDCAccountBot 창에서 "/start" 명령어로 시작합니다.
+1. 포털 로그인 화면([https://portal.gsdc.kr/login](https://portal.gsdc.kr/login)) 아래의 **[비밀번호 초기화]** 를 클릭합니다. (바로가기: [https://portal.gsdc.kr/reissue/password](https://portal.gsdc.kr/reissue/password))
+2. 화면의 안내에 따라 초기화를 진행합니다.
 
-![/start 명령어로 시작할 때,](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=faq-pwreset-1-start.png)
-
-* \[Reset password]를 선택하면 "커뮤니티" 이름을 물어봅니다. 이때, "CMS"를 입력합니다.
-
-![커뮤니티 이름은 \[CMS\] 입니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=faq-pwreset-2-community.png)
-
-* 아이디와 이메일 주소를 입력합니다.
-
-![아이디와 이메일 주소는 가입할 때 정보와 일치해야 합니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=faq-pwreset-3-id-email.png)
-
-* 이메일로 수신된 OTP 코드를 입력합니다.
-
-![](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=faq-pwreset-4-otp.png)
-
-![](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=faq-pwreset-5-done.png)
-
-* 정상적으로 마무리되면 이메일 주소로 리셋된 패스워드가 전송됩니다. 해당 패스워드로 접속을 하면 패스워드를 바로 변경할 수 있습니다.
-* 이후 다시 리셋을 할때에는 "/start" 명령을 클릭해야 합니다.
+> **💡 참고**
+>
+> OTP를 분실하신 경우에는 같은 화면의 **[OTP 초기화]** 를, 비밀번호와 OTP를 모두 초기화해야 하는 경우에는 **[비밀번호 및 OTP 초기화]** 를 이용하시기 바랍니다.
 
 #### 4. /xrd/store/user/\[ID] 디렉토리가 없어요!
 
