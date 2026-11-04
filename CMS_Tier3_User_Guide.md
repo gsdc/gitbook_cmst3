@@ -708,6 +708,22 @@ JDS 파일을 이용하여 작업을 제출할 때는 아래 명령어로 실행
 condor_submit template.jds
 ```
 
+#### 결과 파일을 /xrd에 바로 저장하기 (transfer\_output\_remaps)
+
+transfer\_output\_files 와 transfer\_output\_remaps 를 함께 사용하여 결과 파일을 장기 보관 스토리지(/xrd)에 저장하려는 경우에는, remap 경로를 반드시 `file:///xrd/store/user/[CERN ID]/...` 형식(file:// 뒤에 /xrd 경로, 즉 슬래시 3개)으로 지정해야 합니다. 이렇게 지정해야 WN에서 /xrd로 결과 파일을 바로 저장합니다.
+
+```bash
+transfer_output_files  = result.root
+## (O) WN에서 /xrd로 바로 저장됩니다.
+transfer_output_remaps = "result.root = file:///xrd/store/user/[CERN ID]/output/result_$(Process).root"
+## (X) file:// 없이 경로만 쓰면 WN에서 바로 저장되지 않습니다.
+# transfer_output_remaps = "result.root = /xrd/store/user/[CERN ID]/output/result_$(Process).root"
+```
+
+> **⚠️ 주의**
+>
+> [CERN ID] 부분은 본인의 CERN ID로 바꾸어 입력하시고, 저장할 디렉토리(위 예시의 output)는 작업 제출 전에 미리 만들어 두시기 바랍니다. 여러 작업의 결과 파일 이름이 겹치지 않도록 $(Process) 등의 변수를 파일 이름에 넣어주세요.
+
 현재 KISTI GSDC Tier-3에는 condor\_submit 관련하여 일반적인 환경과 다른 사항이 있습니다. 통합팜 클러스터 활용을 위해 CMS 사용자들은 accounting\_group="group\_cms" 옵션이 반드시 포함된 JDS를 작성하여야 합니다. 기본 bash 환경에서는 아래와 같이 예약어로 설정된 condor\_submit 명령어를 사용하기 때문에 위 내용을 생략할 수 있지만, bash 스크립트 등에서 제출할 경우에는 JDS에 해당 내용을 꼭 추가해주시기 바랍니다.
 
 ```bash
@@ -868,6 +884,10 @@ WN에서 run.sh 스크립트를 통해 실행이 되며 인자로 $(DATAFile)이
 accounting\_group은 통합팜에서 작업을 실행하기 위해 필요합니다.
 
 container universe는 apptainer 컨테이너 런타임 활용을 위해서 사용됩니다. 사용되는 이미지는 .sif 포맷이나 일반 디렉토리(혹은  /cvmfs)를 지정할 수 있습니다.
+
+> **💡 참고**
+>
+> 위 예시의 결과 파일(zcandmass\_$(Process).root)을 /xrd에 바로 저장하려면 transfer\_output\_remaps 경로를 `"zcandmass.root = file:///xrd/store/user/[CERN ID]/zcandmass_$(Process).root"` 처럼 file:/// 형식으로 지정해야 합니다. 자세한 내용은 **4. 배치 작업 사용하기 (HTCondor 기초)** 장의 '결과 파일을 /xrd에 바로 저장하기'를 참고하시기 바랍니다.
 
 ### 참고문헌
 
