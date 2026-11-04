@@ -1050,6 +1050,20 @@ xrdcp root://cmsxrootd.fnal.gov//store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_
 2. 요청하는 쿼터 용량
 3. 쿼터 요청하는 사이트 (T2 또는 T3)
 
+> **❗ 중요**
+>
+> 개인 계정으로 rucio 쿼터를 받아 사용하시는 경우, 서비스를 더 이상 이용하지 않게 되면 **반드시 본인이 추가한 모든 rule을 삭제**해야 합니다. 개인 계정으로 만든 rule은 사이트 관리자도 삭제하거나 변경할 수 없기 때문에, 사용자가 직접 지우지 않으면 데이터와 쿼터가 계속 남게 됩니다. (삭제 방법은 아래 '3. 전송 요청한 데이터셋 삭제 (쿼터 회복)' 참고)
+>
+> 이러한 관리가 부담되신다면 개인 계정 대신 공용 계정인 **t3_kr_kisti_local_users** 로 rule을 추가하시기 바랍니다. RUCIO_USER 환경변수를 t3_kr_kisti_local_users 로 지정한 후 rule을 추가하면 됩니다.
+>
+> 단, t3_kr_kisti_local_users 계정은 해당 CERN e-group에 소속된 사용자만 사용할 수 있습니다. e-group 가입이 필요하신 분은 [cmst3-support@kisti.re.kr](mailto:cmst3-support@kisti.re.kr) 로 CERN ID와 함께 문의해 주시기 바랍니다.
+
+```bash
+## 공용 계정(t3_kr_kisti_local_users)으로 rule 추가 (e-group 소속 사용자만 가능)
+export RUCIO_USER=t3_kr_kisti_local_users
+rucio add-rule cms:[DATASET] 1 T3_KR_KISTI
+```
+
 * 다음 명령어로 rucio 명령어를 사용 가능하도록 설정합니다. (rucioenv 명령어로 대체 가)
 
 ```
@@ -1174,6 +1188,10 @@ Total: 1565 / Success: 4 / Fail: 0
 ### 3. 전송 요청한 데이터셋 삭제 (쿼터 회복)
 
 rucio 로 전송한 데이터셋은  rucio delete-rule 명령어로 삭제가 가능합니다. 단, 다른 사용자가 같은 데이터셋을 신청한 상태라면 데이터셋 자체는 삭제되지 않습니다. 하지만, 쿼터는 복구되므로 필요한 쿼터를 확보할 수 있습니다.
+
+> **❗ 중요**
+>
+> 개인 계정으로 rucio를 사용하다가 서비스를 더 이상 이용하지 않게 되는 경우, 아래 방법으로 `rucio list-rules --account [CERN ID]` 에 나오는 **모든 rule을 반드시 삭제**해 주시기 바랍니다. 개인 계정의 rule은 사이트 관리자도 삭제할 수 없습니다. 공용 계정(t3_kr_kisti_local_users)으로 추가한 rule은 이 절차가 필요하지 않습니다.
 
 ```bash
 [geonmo@ui20 ~]$ rucio list-rules --account geonmo
