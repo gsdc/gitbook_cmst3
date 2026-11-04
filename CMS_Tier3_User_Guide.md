@@ -39,9 +39,9 @@ KISTI CMS Tier-3 사용자는 아래 UI(User Interface) 서버로 접속합니�
 
 > **⚠️ 주의**
 >
-> 기존 UI 서버인 ui20은 곧 폐기될 예정입니다. 앞으로는 cms-ui.sdfarm.kr 로 접속해 주시기 바랍니다. 이 문서의 일부 실행 예시에 남아 있는 `[geonmo@ui20 ~]$`, `[geonmo@ui10 ~]$` 같은 프롬프트는 예전 서버에서 실행한 예시이며, 명령어 사용법은 cms-ui.sdfarm.kr 에서도 같습니다.
+> 기존 UI 서버인 ui20은 **2026년 11월 30일까지** 운영한 후 종료될 예정입니다. 앞으로는 cms-ui.sdfarm.kr 로 접속해 주시기 바랍니다. 이 문서의 일부 실행 예시에 남아 있는 `[geonmo@ui20 ~]$`, `[geonmo@ui10 ~]$` 같은 프롬프트는 예전 서버에서 실행한 예시이며, 명령어 사용법은 cms-ui.sdfarm.kr 에서도 같습니다.
 
-또한, 내부에서 접속 가능한 UI 서버인 cms-gpu01가 있습니다. 해당 서버는 NVidia P100이 설치되어 있어 기계학습을 이용한 프로그램을 사용하실 때에 권장됩니다. (cms-ui.sdfarm.kr 에 먼저 접속한 뒤 접속하세요.)
+또한, 내부에서만 접속 가능한 GPU 서버인 cms-gpu01이 있습니다. 해당 서버는 NVidia P100이 설치되어 있어 기계학습을 이용한 프로그램을 사용하실 때에 권장됩니다. (cms-ui.sdfarm.kr 에 먼저 접속한 뒤 접속하세요.)
 
 ### 리눅스 혹은 macOS 환경에서의 접속 방법
 
@@ -95,25 +95,11 @@ MobaXterm 프로그램은 사용자 본인이 직접 홈페이지에서 파일�
 
 ## 2. 초기 환경 설정
 
-*여기서는 접속 후 초기 설정에 관한 내용입니다. 첫 접속 후 **OTP 토큰 등록은 반드시** 진행해야 하며, 그 외의 환경설정은 리눅스 환경을 처음 써보시는 경우 따라하시는 것을 추천드립니다. (OTP 외의 설정은 본인의 취향대로 하셔도 무방합니다.)*
+*여기서는 접속 후 초기 설정에 관한 내용입니다. 리눅스 환경을 처음 써보시는 경우 아래의 환경설정을 따라하시는 것을 추천드립니다. (OTP는 포털 가입 시 이미 등록되므로 여기서 따로 등록하지 않습니다.)*
 
-### OTP 토큰 등록
+### OTP 등록
 
-#### OTP 등록 절차 안내
-
-첫 접속을 하시면 바로 OTP 등록 작업을 진행해주시기 바랍니다. OTP가 등록되지 않은 계정은 그 다음 영업일에 계정이 비활성화될 수 있습니다.
-
-토큰 발급은 아래와 같이 진행합니다.
-
-```bash
-## 언어 혹은 인코딩 설정이 C 로 되어 있는 경우에는 정상적으로 OTP QR 코드를 확인할 수 없습니다. 
-## 따라서, 이를 해제해야 합니다. 비트워든 같은 프로그램은 QR코드가 아니라 URI로 등록이 가능하므로
-## 이를 이용하실 때에는 무시하셔도 됩니다.
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-## 토큰을 발급합니다.
-ipa otptoken-add
-```
+OTP는 GSDC 포털 가입 과정에서 반드시 등록하도록 되어 있으므로, 서버에 접속한 뒤 별도로 OTP를 등록하실 필요가 없습니다. OTP를 분실하셨거나 기기를 바꾸신 경우에는 포털 로그인 화면의 **[OTP 초기화]** 를 이용하시기 바랍니다. (**11. FAQ 및 문제 해결** 장의 '패스워드를 리셋하고 싶어요!' 참고)
 
 ### 그리드 인증서 설치
 
@@ -363,11 +349,11 @@ SSH 공개키를 만들기 위해서는 다음과 같은 작업이 필요합니�
 ```bash
 [geonmo@ui10 .ssh]$ ssh-keygen -t rsa
 Generating public/private rsa key pair.
-Enter file in which to save the key (/share/geonmo/.ssh/id_rsa): 
+Enter file in which to save the key (/cms/ldap_home/geonmo/.ssh/id_rsa): 
 Enter passphrase (empty for no passphrase): 
 Enter same passphrase again: 
-Your identification has been saved in /share/geonmo/.ssh/id_rsa.
-Your public key has been saved in /share/geonmo/.ssh/id_rsa.pub.
+Your identification has been saved in /cms/ldap_home/geonmo/.ssh/id_rsa.
+Your public key has been saved in /cms/ldap_home/geonmo/.ssh/id_rsa.pub.
 The key fingerprint is:
 1c:17:f5:77:f0:77:06:f6:8e:3e:32:49:24:2c:e9:cf geonmo@ui10.sdfarm.kr
 The key's randomart image is:
@@ -466,7 +452,7 @@ CPU 코어들은 HTCondor 작업 관리자를 이용하여 자원을 배치하�
 
 #### GPU 자원
 
-KISTI-GSDC CMS Tier-3에는 머신러닝, GPGPU 기능 제공을 위해 GPU 서버를 1대 구비하고 있습니다.  이를 사용하시려면 해당 UI 서버로 직접 접속하셔서 사용을 권장드립니다.
+KISTI-GSDC CMS Tier-3에는 머신러닝, GPGPU 기능 제공을 위해 GPU 서버를 1대 구비하고 있습니다.  이를 사용하시려면 cms-ui.sdfarm.kr 에 접속한 뒤 GPU 서버(cms-gpu01)로 접속하여 사용하시기를 권장드립니다.
 
 해당 서버로 접속하기 위해 아래 명령어를 사용하십시오.
 
@@ -1025,7 +1011,7 @@ xrdcp root://cmsxrootd.fnal.gov//store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_
 
 ### 2. 데이터셋 전송 요청
 
-##### (1) Rucio (For Public Dataset)
+##### Rucio (For Public Dataset)
 
 현재 rucio 명령어를 통해 데이터를 전송하려면 T3\_KR\_KISTI에 대한 공간 쿼터를 할당 받아야 합니다. 혹시 쿼터가 필요한 분들은 다음 정보를 포함하여 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 요청하시기 바랍니다.
 
@@ -1086,88 +1072,6 @@ rucio list-rules --account geonmo
 
 * 총 9개의 파일 중 9개 전송 완료 \[OK:9, REPL: 0, STUCK:0]
 
-##### (2) xrdDownload.py (for User Dataset)
-
-개인 사용자가 만들어서 publish한 dataset은 아직 rucio를 통해 전송이 불가능합니다. 이에 따라, 각 파일들을 쉽게 전송할 수 있는 스크립트를 제공하고 있습니다. 아래 절차대로 데이터 전송 작업을 진행하시기 바랍니다.
-
-* [hep-tools](https://github.com/cms-kr/hep-tools) Git 저장소로부터 dataset2filelist.sh와 xrdDownload.py 를 본인의 PATH 경로로 다운로드 받습니다.
-* dataset2filelist.sh 를 이용하여 다운로드 받으려는 데이터셋들의 개별 파일 목록을 작성합니다.
-
-**📄 input_dataset.txt**
-```bash
-/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/swertz-TopNanoAODv6-1-1_2018-0d1d4920f08f56d048ece029b873a2cc/USER
-/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/palencia-TopNanoAODv6-1-1_2018-0d1d4920f08f56d048ece029b873a2cc/USER
-/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/swertz-TopNanoAODv6-1-1_2018-0d1d4920f08f56d048ece029b873a2cc/USER
-```
-
-**▶ Bash**
-```bash
-[geonmo@ui20 migration]$ dataset2filelist.sh input_dataset.txt datalist.txt
-```
-
-dataset2filelist.sh \[from dataset list file] \[to data list result file]
-
-**📄 datalist.txt**
-```bash
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_597.root   615580493  
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_24.root   615219932  
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_17.root   615423490  
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_387.root   616238957  
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_538.root   615412910  
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_32.root   615054868  
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_535.root   615491181  
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_405.root   615219946  
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_622.root   615852354  
-/store/user/swertz/topNanoAOD/v6-1-1/2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TopNanoAODv6-1-1_2018/200610_101606/0000/tree_147.root   615512903 
-```
-
-* xrdDownload.py 스크립트에 해당 파일리스트를 이용하여 전송을 합니다.
-
-**▶ Bash**
-```bash
-[geonmo@ui20 migration]$ xrdDownload.py -i datalist.txt -p 4
-missing file                                                                                                                                                
-missing file                                                                                                                                                
-missing file
-missing file
-missing file
-Source:  root://cmsxrootd.fnal.gov//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0001/nano_1444.root
-Destination:  root://cms-xrdr.private.lo:2094//xrd//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0001/nano_1444.root
-Source:  root://cmsxrootd.fnal.gov//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0002/nano_2098.root
-Destination:  root://cms-xrdr.private.lo:2094//xrd//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0002/nano_2098.root
-Source:  root://cmsxrootd.fnal.gov//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_229.root
-Source:  root://cmsxrootd.fnal.gov//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_343.root
-Destination:  root://cms-xrdr.private.lo:2094//xrd//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_229.root
-Destination:  root://cms-xrdr.private.lo:2094//xrd//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_343.root
-
-/store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_229.root is failed.        
-Total: 1565 / Success: 1 / Fail: 0
-
-/store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_343.root is failed.          
-Source:  root://cmsxrootd.fnal.gov//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0001/nano_1009.root
-Destination:  root://cms-xrdr.private.lo:2094//xrd//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0001/nano_1009.root
-Total: 1565 / Success: 2 / Fail: 0
-
-/store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0001/nano_1444.root is failed.         
-Source:  root://cmsxrootd.fnal.gov//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_319.root
-/store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0002/nano_2098.root is failed.         
-Destination:  root://cms-xrdr.private.lo:2094//xrd//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_319.root
-Total: 1565 / Success: 3 / Fail: 0
-
-Source:  root://cmsxrootd.fnal.gov//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_853.root
-Destination:  root://cms-xrdr.private.lo:2094//xrd//store/group/lpccoffea/coffeabeans/NanoAODv6/nano_2016/MET/NanoTuples-2016_Run2016B-17Jul2018_ver2-v1/191210_034740/0000/nano_853.root
-Total: 1565 / Success: 4 / Fail: 0
-
-```
-
-\-i \[Data list file] : 데이터 파일 리스트를 지정합니다. 복사 과정 중에 이미 전송된 파일들의 경우 자동으로 빠지기 때문에 전체 리스트를 넣으면 됩니다.
-
-\-p \[num of parallel] : 동시에 전송할 파일 개수를 지정합니다. 4개가 적당하며 6개 이상부터는 후반에 에러가 발생할 확률이 높습니다. 네트워크 상태에 따라 선택하면 됩니다.
-
-> **💡 참고**
->
-> xrdDownload.py는 기존 파일의 크기를 이용하여 상태를 확인합니다. 따라서, 일부만 전송되었거나 전송되지 않은 파일들만 전송을 시도하기 때문에 도중에 작업을 취소한 후에 다시 시작할 수 있습니다.
-
 ### 3. 전송 요청한 데이터셋 삭제 (쿼터 회복)
 
 rucio 로 전송한 데이터셋은  rucio delete-rule 명령어로 삭제가 가능합니다. 단, 다른 사용자가 같은 데이터셋을 신청한 상태라면 데이터셋 자체는 삭제되지 않습니다. 하지만, 쿼터는 복구되므로 필요한 쿼터를 확보할 수 있습니다.
@@ -1196,9 +1100,6 @@ rucio를 호라용하실 때 사용량 및 쿼터 용량 확인이 필요하신 
 
 ```bash
 [geonmo@ui20 ~]$ rucio list-account-limits geonmo                                                                                                        
-/cvmfs/cms.cern.ch/rucio/x86_64/slc7/py2/current/lib/python2.7/site-packages/paramiko/transport.py:33: CryptographyDeprecationWarning: Python 2 is no longer
- supported by the Python core team. Support for it is now deprecated in cryptography, and will be removed in the next release.                              
-  from cryptography.hazmat.backends import default_backend                                                                                                  
 +-------------+-----------+                                                                                                                                  
 | RSE         | LIMIT     |                                                                                                                                  
 |-------------+-----------|                                                                                                                                  
@@ -1499,14 +1400,13 @@ ssh -Y cms-gpu01
 # ex) ssh -4 -L 8889:localhost:8888 $USER@cms-gpu01
 ```
 
-#### VirtualEnv 을 이용한 Python 환경 구축
+#### Python 가상환경(venv) 구축
 
-VirtualEnv 를 통해 Python 설치 환경을 일반 사용자로서 설치가 가능하도록 합니다.
+Python 가상환경을 이용하면 일반 사용자 권한으로 Python 패키지를 설치할 수 있습니다. 현재 UI 서버의 기본 Python은 Python 3입니다.
 
 ```
 cd $HOME
-### PyROOT 실행을 위해서는 python2 필요. ROOT 사용 안하면 python3 권장.
-virtualenv -p python2 my_workspace
+python3 -m venv my_workspace
 ```
 
 #### 작업 공간에서 Python 패키지 설치
@@ -1517,7 +1417,7 @@ virtualenv -p python2 my_workspace
 cd my_workspace
 source bin/activate
 mkdir $HOME/pip_cache
-TMPDIR=$PWD pip install --cache-dir=$HOME/pip_cache --build $PWD/build jupyter pandas seaborn torch sklearn  metakernel zmq
+TMPDIR=$PWD pip install --cache-dir=$HOME/pip_cache jupyter pandas seaborn torch scikit-learn metakernel pyzmq
 ```
 
 #### Jupyter 실행
@@ -1607,7 +1507,7 @@ jupyter notebook --no-browser --ip 0.0.0.0 --port XXXX
 
 **(1) CPU 과다 사용**
 
-top 명령어로 CPU 사용량을 확인하면 쉽게 알 수 있습니다. 현재 UI 서버는 cms-ui.sdfarm.kr 한 대만 운영하고 있으므로, 특정 사용자가 자원을 과도하게 사용하고 있다면 해당 계정명을 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 관리자에게 알려주시기 바랍니다. 확인 후 조치하겠습니다.
+top 명령어로 CPU 사용량을 확인하면 쉽게 알 수 있습니다. UI 서버는 cms-ui.sdfarm.kr 한 대로 운영됩니다. (기존 ui20은 2026년 11월 30일 종료 예정) 따라서 특정 사용자가 자원을 과도하게 사용하고 있다면 해당 계정명을 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 관리자에게 알려주시기 바랍니다. 확인 후 조치하겠습니다.
 
 **(2) HOME 디렉토리 과다 사용**
 
