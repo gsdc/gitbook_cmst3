@@ -339,7 +339,7 @@ crab checkusername
 > DN is: /C=KR/O=KISTI/O=KISTI/CN=58079576 Geonmo Ryu Retrieving username for this DN... \
 > username is geonmo
 
-위 명령어로 확인한 CERN 계정과 KISTI 계정을 관리자에게 보내주시면 /xrootd\_users/\<userid> 디렉토리 밑에 사용자 저장소를 마운트해드립니다.
+위 명령어로 확인한 CERN 계정과 KISTI 계정을 관리자에게 보내주시면 /xrootd\_users/\[userid] 디렉토리 밑에 사용자 저장소를 마운트해드립니다.
 
 > **💡 참고**
 >
@@ -499,14 +499,18 @@ CMS Tier-3는  KCMS 연구자들에게 독점적인 1004TB 자원을 제공하�
 
 GSIFTP 기능도 제공하기 때문에 PhEDEx 및 gfal util을 이용한 SRM 프로토콜 사용도 가능합니다. 하지만, xrootd와 gsiftp를 사용할 때 URL이 다르므로 주의하여야 합니다.
 
-| Protocol  |                    GSIFTP                    |              XROOT for Public             |             XROOT for Internal             |
-| --------- | :------------------------------------------: | :---------------------------------------: | :----------------------------------------: |
-| Prefix    |                   gsiftp://                  |                  root://                  |                   root://                  |
-| Server    |               cms-se.sdfarm.kr               |             cms-xrdr.sdfarm.kr            |             cms-xrdr.private.lo            |
-| Directory |                //xrootd/store                |                //xrd/store                |                 //xrd/store                |
-| Port      |                     2811                     |                    1094                   |                    2094                    |
-| Client    |        gfal util (gfal-copy, gfal-ls)        |                xrdfs, xrdcp               |                xrdfs, xrdcp                |
-| Full URL  | gsiftp://cms-se.sdfarm.kr:2811//xrootd/store | root://cms-xrdr.sdfarm.kr:1094//xrd/store | root://cms-xrdr.private.lo:2094//xrd/store |
+| Protocol  |                    GSIFTP                    |              XROOT for Public             |        클러스터 내부 (UI, WN)        |
+| --------- | :------------------------------------------: | :---------------------------------------: | :----------------------------------: |
+| Prefix    |                   gsiftp://                  |                  root://                  |           없음 (로컬 경로)           |
+| Server    |               cms-se.sdfarm.kr               |             cms-xrdr.sdfarm.kr            |                   -                  |
+| Directory |                //xrootd/store                |                //xrd/store                |              /xrd/store              |
+| Port      |                     2811                     |                    1094                   |                   -                  |
+| Client    |        gfal util (gfal-copy, gfal-ls)        |                xrdfs, xrdcp               |   ls, cp, ROOT 등 일반 파일 경로로 사용  |
+| Full URL  | gsiftp://cms-se.sdfarm.kr:2811//xrootd/store | root://cms-xrdr.sdfarm.kr:1094//xrd/store |              /xrd/store              |
+
+> **💡 참고**
+>
+> 시스템 변경으로 클러스터 내부(UI 서버 및 WN)에서 permanent 스토리지를 사용할 때는 더 이상 root://cms-xrdr.private.lo:2094 를 사용하지 않고 /xrd 디렉토리를 바로 사용하시면 됩니다. 예) root://cms-xrdr.private.lo:2094//xrd/store/user/\[ID]/a.root → /xrd/store/user/\[ID]/a.root
 
 ---
 
@@ -520,8 +524,7 @@ HTCondor는 우리 CMS Tier-3에서 제공하는 배치 시스템입니다. 해�
 
 #### HTCondor 사용시 알아둬야하는 부분
 
-* /xrootd 및 /xrootd\_user 디렉토리는 WN에서 접근이 제한되므로 xrootd 프로토콜로 직접 접속을 하시기 바랍니다.
-* KISTI 내부에서는 root://cms-xrdr.private.lo:2094 를 접두어로 사용하면 됩니다.
+* 클러스터 내부(UI, WN)에서는 permanent 스토리지를 /xrd 디렉토리로 바로 사용하면 됩니다. (예: /xrd/store/user/\[ID]/...) 이전에 사용하던 root://cms-xrdr.private.lo:2094 접두어는 더 이상 사용하지 않습니다.
 * 외부에서 KISTI 저장소에 접근을 하려면 root://cms-xrdr.sdfarm.kr:1094 를 사용하여야 합니다.
   * 이 경로는 사용자 프록시 인증서가 꼭 필요합니다.  (voms-proxy-init 명령어 참고)
   * 실행 스크립트에서 인증서를 /tmp로 보내거나 작업디렉토리($\_CONDOR\_SCRATCH\_DIR)를 인증서 보관 디렉토리로 지정하여야 합니다.
@@ -803,7 +806,7 @@ dasgoclient --query="file dataset=/ZZ_TuneCP5_13TeV-pythia8/RunIIFall17NanoAODv4
 ## Prefix 추가. 데이터 파일의 위치를 알고 있다면 prefix에 해당 센터의 xrootd 경로를 넣으시면 됩니다.
 sed -i 's/^/root:\/\/cmsxrootd.fnal.gov\//g' filelist.txt
 ### T3_KR_KISTI의 경우,
-## sed -i 's/^/root:\/\/cms-xrdr.private.lo:2094\/\/xrd/g' filelist.txt
+## sed -i 's/^/\/xrd/g' filelist.txt
 ```
 
 #### 실습 코드에 관한 설명
@@ -811,7 +814,7 @@ sed -i 's/^/root:\/\/cmsxrootd.fnal.gov\//g' filelist.txt
 해당 실습 코드는 getZMass.py 라는 분석 코드를 각 WN 머신에서 수행하게 됩니다. 이 때, 해당 분석코드는 첫번째 인자로 데이터 파일을 입력 받습니다.
 
 ```
-./getZMass.py root://cms-xrdr.private.lo:2094//xrd/store/mc/RunIIFall17NanoAODv4/ZZ_TuneCP5_13TeV-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/30000/8DC8188D-246C-6D41-A24A-78C0CBBC6F17.root
+./getZMass.py /xrd/store/mc/RunIIFall17NanoAODv4/ZZ_TuneCP5_13TeV-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/30000/8DC8188D-246C-6D41-A24A-78C0CBBC6F17.root
 ```
 
 > (base) \[geonmo@ui10 KISTIBatch]$ ls -l \*.root \
@@ -1021,7 +1024,7 @@ xrdcp root://cmsxrootd.fnal.gov//store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_
 ###CMSSW 디렉토리 내에서 cmsenv를 하였을 경우 작동 안될 가능성 있음.
 source /cvmfs/cms.cern.ch/cmsset_default.sh 
 source /cvmfs/cms.cern.ch/rucio/setup.sh 
-export RUCIO_ACCOUNT=<CERN ID>
+export RUCIO_ACCOUNT=[CERN ID]
 voms-proxy-init --voms cms
 
 ### CERN과 KISTI ID가 같다면 다음 명령어로 바로 적용 가능합니다.
@@ -1032,10 +1035,10 @@ rucioenv
 
 ```
 ### 쿼터가 있을 경우
-rucio add-rule cms:<DATASET> 1 T3_KR_KISTI
+rucio add-rule cms:[DATASET] 1 T3_KR_KISTI
 
 ## 쿼타가 없어서 데이터셋마다 확인이 필요할 경우,
-rucio add-rule --ask-approval cms:<DATASET> 1 T3_KR_KISTI
+rucio add-rule --ask-approval cms:[DATASET] 1 T3_KR_KISTI
 ```
 
 * 아래 명령어로 데이터셋 전송 상태를 확인행합니다
@@ -1073,7 +1076,7 @@ rucio list-rules --account geonmo
 [geonmo@ui20 migration]$ dataset2filelist.sh input_dataset.txt datalist.txt
 ```
 
-dataset2filelist.sh \<from dataset list file> \<to data list result file>
+dataset2filelist.sh \[from dataset list file] \[to data list result file]
 
 **📄 datalist.txt**
 ```bash
@@ -1128,9 +1131,9 @@ Total: 1565 / Success: 4 / Fail: 0
 
 ```
 
-\-i \<Data list file> : 데이터 파일 리스트를 지정합니다. 복사 과정 중에 이미 전송된 파일들의 경우 자동으로 빠지기 때문에 전체 리스트를 넣으면 됩니다.
+\-i \[Data list file] : 데이터 파일 리스트를 지정합니다. 복사 과정 중에 이미 전송된 파일들의 경우 자동으로 빠지기 때문에 전체 리스트를 넣으면 됩니다.
 
-\-p \<num of parallel> : 동시에 전송할 파일 개수를 지정합니다. 4개가 적당하며 6개 이상부터는 후반에 에러가 발생할 확률이 높습니다. 네트워크 상태에 따라 선택하면 됩니다.
+\-p \[num of parallel] : 동시에 전송할 파일 개수를 지정합니다. 4개가 적당하며 6개 이상부터는 후반에 에러가 발생할 확률이 높습니다. 네트워크 상태에 따라 선택하면 됩니다.
 
 > **💡 참고**
 >
@@ -1259,13 +1262,13 @@ xrdcp는 xrootd 프로토콜을 이용한 데이터 전송 프로그램입니다
 ```bash
 [geonmo@ui20 geonmo]$ ls /xrootd/store/user/geonmo/dummy.dat 
 /xrootd/store/user/geonmo/dummy.dat
-[geonmo@ui20 geonmo]$ xrdcp -f root://cms-xrdr.private.lo:2094//xrd/store/user/geonmo/dummy.dat /dev/null
+[geonmo@ui20 geonmo]$ xrdcp -f /xrd/store/user/geonmo/dummy.dat /dev/null
 [100MB/100MB][100%][==================================================][100MB/s]  
 ```
 
 ##### xrdMigration.py 사용하기
 
-xrdMigration.py는 /cms/lda&#x70;_&#x68;ome,_ /cms/scratch, /cms\_scratch에 저장된 데이터 파일들을 /xrootd/store/user/\<USERID>로 옮기기 위해 개발되었습니다. 해당 /cms 디렉토리들의 경로를 지정하면 동일한 경로명으로 /xrootd 디렉토리로 옮겨줍니다.
+xrdMigration.py는 /cms/lda&#x70;_&#x68;ome,_ /cms/scratch, /cms\_scratch에 저장된 데이터 파일들을 /xrootd/store/user/\[USERID]로 옮기기 위해 개발되었습니다. 해당 /cms 디렉토리들의 경로를 지정하면 동일한 경로명으로 /xrootd 디렉토리로 옮겨줍니다.
 
 **▶ 옵션 설명**
 ```bash
@@ -1277,7 +1280,7 @@ xrdcp: /cms/ldap_home/geonmo/migration_test/subdir is a directory.
 ```
 
 -d                     : 복사 후 checksum 값 비교후 정상이면 기존 파일 삭제\
--c \<CERN ID> : CERN ID를 기입하여 실행 속도 향상. -c 옵션이 없을 경우 CERN CRIC에 질의를 하여 사용자의 인증서 정보를 이용하여 CERN ID 정보를 가져오기 때문에 약 1분 가량의 지연시간이 발생합니다.
+-c \[CERN ID] : CERN ID를 기입하여 실행 속도 향상. -c 옵션이 없을 경우 CERN CRIC에 질의를 하여 사용자의 인증서 정보를 이용하여 CERN ID 정보를 가져오기 때문에 약 1분 가량의 지연시간이 발생합니다.
 
 xrdMigration.py 스크립트를 사용하면 새로 생성된 디렉토리의 캐쉬 정보를 리셋을 합니다. 따라서, 디렉토리를 생성하였으나 실제로 없는 디렉토리라면서 접근이 안되는 현상이 사라집니다. 되도록 xrdMigration.py를 사용하길 추천드립니다.
 
@@ -1294,25 +1297,25 @@ WN에서 스토리지 데이터를 접근하는 방법에 대해서 기술합니
 
 **▶ ROOT**
 ```
-## XRootD 프로토콜로 접근
-root -l root://cms-xrdr.private.lo:2094//xrd/store/user/<CERNID>/~~.root
+## 클러스터 내부에서는 /xrd 경로로 바로 접근
+root -l /xrd/store/user/[CERNID]/~~.root
 or
-datafile = TFile::Open("root://cms-xrdr.private.lo:2094//xrd/store/user/~~");
+datafile = TFile::Open("/xrd/store/user/~~");
 ```
 
 **▶ PyROOT**
 ```
 ## In pyROOT,
-datafile = TFile.Open("root://cms-xrdr.private.lo:2094//xrd/store/user/~~")
+datafile = TFile.Open("/xrd/store/user/~~")
 ```
 
 **▶ CMSSW**
 ```
-## T3 데이터의 경우, LFN 및XRootD PFN 접근 둘다 가능합니다.
+## T3 데이터의 경우, LFN 및 /xrd 로컬 경로(file: 접두어) 접근 둘다 가능합니다.
 process.source = cms.Source("PoolSource",                            
             fileNames = cms.untracked.vstring(
             '/store/user/~~~.root',
-            'root://cms-xrdr.private.lo:2094//xrd/store/user/~~.root',
+            'file:/xrd/store/user/~~.root',
     )
 )
 ```
@@ -1322,7 +1325,7 @@ process.source = cms.Source("PoolSource",
 **▶ ROOT**
 ```
 ## XRootD 프로토콜로 접근
-root -l root://cms-t2-se01.sdfarm.kr:1096//store/user/<CERNID>/~~.root
+root -l root://cms-t2-se01.sdfarm.kr:1096//store/user/[CERNID]/~~.root
 or
 datafile = TFile::Open("root://cms-t2-se01.sdfarm.kr:1096//store/user/~~");
 ```
@@ -1388,7 +1391,7 @@ CRAB3의 자세한 설정은 [CRAB3 페이지](https://twiki.cern.ch/twiki/bin/v
 
 #### CRAB3 결과를 KISTI에 저장하기
 
-Tier-3에 결과파일을 저장하기 위해서는 아래 옵션을 사용합니다. 저장된 데이터셋은 /xrootd/store/user/\<CERN ID> 밑에서 확인하실 수 있습니다.
+Tier-3에 결과파일을 저장하기 위해서는 아래 옵션을 사용합니다. 저장된 데이터셋은 /xrootd/store/user/\[CERN ID] 밑에서 확인하실 수 있습니다.
 
 **📄 crabConfig.py**
 ```python
@@ -1604,11 +1607,11 @@ jupyter notebook --no-browser --ip 0.0.0.0 --port XXXX
 * 정상적으로 마무리되면 이메일 주소로 리셋된 패스워드가 전송됩니다. 해당 패스워드로 접속을 하면 패스워드를 바로 변경할 수 있습니다.
 * 이후 다시 리셋을 할때에는 "/start" 명령을 클릭해야 합니다.
 
-#### 4. /xrootd/store/user/\<ID> 디렉토리와 /xrootd\_user/\<ID> 디렉토리가 없어요!
+#### 4. /xrootd/store/user/\[ID] 디렉토리와 /xrootd\_user/\[ID] 디렉토리가 없어요!
 
 /xrootd\_user 디렉토리는 스토리지의 쓰기 관련한 작업을UI 서버에서 처리 할 수있도록 지원하기 위해 생성된 디렉토리입니다. 이 디렉토리는 관리자가 생성해주는디렉토리입니다. 관리자에게 CENRN Account ID와 함께 요청을 해주세요.
 
-/xrootd/store/user/\<ID> 디렉토리는 CRAB 작업 제출을 통해 생성이가능합니다. CRAB3 사용관련 페이지를 참고해주세요.
+/xrootd/store/user/\[ID] 디렉토리는 CRAB 작업 제출을 통해 생성이가능합니다. CRAB3 사용관련 페이지를 참고해주세요.
 
 #### 5. UI 서버에서 작업을 하려고 하는데 타이핑도 늦어질 정도로 느려요!
 
