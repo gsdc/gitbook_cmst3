@@ -26,18 +26,29 @@
 
 *이 페이지에서는 KISTI CMS Tier-3에 접속 하는 방법에 대해서 설명을 드립니다.*
 
-### 접속 정보 공개 불가 안내
+### 접속 정보
 
-보안상의 위험을 피하고자 인터넷 공간처럼 공개된 문서에는 자세한 접속 정보를 알려드리지 않고 있습니다.  해당 정보는 가입 신청 시 이메일을 통해 개별적으로 통보드립니다.  해당 정보를  가지고 아래의 방법들로 접속을 하셔서 이용하시기 바랍니다.
+KISTI CMS Tier-3 사용자는 아래 UI(User Interface) 서버로 접속합니다.
 
-KISTI CMS Tier-3에는 외부에서 접속이 가능한 2개의  UI(User interface) 서버들을 보유하고 있습니다. 각 UI 서버들은 CentOS7 리눅스 배포판으로 설치되었습니다.  또한, 내부에서 접속 가능한 UI 서버인 cms-gpu01가 있습니다. 해당 서버는 NVidia P100이 설치되어 있어 기계학습을 이용한 프로그램을 사용하실 때에 권장됩니다.
+| 항목 | 내용 |
+| --- | --- |
+| 호스트 이름 | cms-ui.sdfarm.kr |
+| SSH 포트 | 48217 |
+| 운영체제 | AlmaLinux 9 |
+| 계정 | 포털에서 발급받은 사용자 ID |
+
+> **⚠️ 주의**
+>
+> 기존 UI 서버인 ui20은 곧 폐기될 예정입니다. 앞으로는 cms-ui.sdfarm.kr 로 접속해 주시기 바랍니다. 이 문서의 일부 실행 예시에 남아 있는 `[geonmo@ui20 ~]$`, `[geonmo@ui10 ~]$` 같은 프롬프트는 예전 서버에서 실행한 예시이며, 명령어 사용법은 cms-ui.sdfarm.kr 에서도 같습니다.
+
+또한, 내부에서 접속 가능한 UI 서버인 cms-gpu01가 있습니다. 해당 서버는 NVidia P100이 설치되어 있어 기계학습을 이용한 프로그램을 사용하실 때에 권장됩니다. (cms-ui.sdfarm.kr 에 먼저 접속한 뒤 접속하세요.)
 
 ### 리눅스 혹은 macOS 환경에서의 접속 방법
 
 리눅스 혹은 macOS에서는 운영체제에 내장된 ssh 클라이언트 프로그램을 이용하여 UI 서버에 접속하실 수 있습니다.
 
-```
-ssh -p [Port Number] [Host Name]
+```bash
+ssh -p 48217 [사용자 ID]@cms-ui.sdfarm.kr
 ```
 
 > **💡 참고**
@@ -62,7 +73,11 @@ MobaXterm 프로그램은 사용자 본인이 직접 홈페이지에서 파일�
 
 ##### 접속방법
 
-설치한 MobaXterm을 실행한 후 \[Session] - \[SSH] 버튼을 클릭하시고 필요한 정보를 기입하시면 접속을 할 수 있는 세션을 생성하실 수 있습니다. 암호를 입력한 이후에는 암호 입력 없이 접속이 가능합니다. 자세한 정보는 보내드리는 이메일 정보를 확인하십시오.
+설치한 MobaXterm을 실행한 후 \[Session] - \[SSH] 버튼을 클릭하시고 아래 정보를 기입하시면 접속을 할 수 있는 세션을 생성하실 수 있습니다. 암호를 입력한 이후에는 암호 입력 없이 접속이 가능합니다.
+
+* Remote host : cms-ui.sdfarm.kr
+* Specify username : 사용자 ID
+* Port : 48217
 
 ![그림1. \[세션\]을 클릭합니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=access-mobaxterm-session.png)
 
@@ -125,8 +140,8 @@ CERN CA나 KISTI CA를 통해 발급 받은 인증서를 브라우저의 인증�
 scp 명령어를 통해 파일을 UI 서버로 전송하실 수 있습니다.
 
 ```bash
-## ssh 명령어와 달리 대문자 P로 포트 번를 지정합니다.
-scp -P [Port Number] [Hostname of UI Server]
+## ssh 명령어와 달리 대문자 P로 포트 번호를 지정합니다.
+scp -P 48217 [인증서 파일] [사용자 ID]@cms-ui.sdfarm.kr:~/
 ```
 
 ##### 윈도우 사용자
@@ -226,12 +241,18 @@ source /cvmfs/cms.cern.ch/cmsset_default.csh
 환경변수들이 올바르게 적용되면 scram, cmsenv 등 CMSSW 명령어들을 사용하실 수 있습니다. 아래와 같은 방법으로 CMSSW 버전을 확인할 수 있습니다.
 
 ```bash
-## On ui10, 
-export SCRAM_ARCH=slc6_amd64_gcc700
-scram list CMSSW 
-## On ui20, 
+## cms-ui.sdfarm.kr (AlmaLinux 9)
+export SCRAM_ARCH=el9_amd64_gcc12
+scram list CMSSW
+```
+
+UI 서버는 AlmaLinux 9(EL9)이므로 EL9용 SCRAM_ARCH(el9_amd64_gccXX)를 사용합니다. SLC6/CentOS7(slc6_*, slc7_*) 용 구버전 CMSSW가 필요한 경우에는 CVMFS에서 제공하는 컨테이너 명령어(cmssw-el6, cmssw-el7)로 해당 OS 환경에 들어간 뒤 작업하시기 바랍니다.
+
+```bash
+## 예) CentOS7 환경이 필요한 구버전 CMSSW 사용
+cmssw-el7
 export SCRAM_ARCH=slc7_amd64_gcc700
-scram list CMSSW 
+scram list CMSSW
 ```
 
 > **💡 참고**
@@ -710,11 +731,10 @@ cmsrel CMSSW_10_2_9
 
 > Waiting for release information to be obtained via [https://cmssdt.cern.ch/SDT/releases.map?release=CMSSW\_10\_2\_9\&architecture=slc7\_amd64\_gcc700\&scram=V2\_2\_9\_pre04\&releasetop=/cvmfs/cms.cern.ch/slc7\_amd64\_gcc700/cms/cmssw/CMSSW\_10\_2\_9](https://cmssdt.cern.ch/SDT/releases.map?release=CMSSW_10_2_9\&architecture=slc7_amd64_gcc700\&scram=V2_2_9_pre04\&releasetop=/cvmfs/cms.cern.ch/slc7_amd64_gcc700/cms/cmssw/CMSSW_10_2_9) (timeout in 7s) WARNING: Developer's area is created for non-production architecture slc7\_amd64\_gcc700. **Production architecture for this release is slc6\_amd64\_gcc700.**
 
-위 메시지를 참고하여 사용S중인 ui서버의  환경을 SLC6 로 변경합니다.  또한, SCRAM\_ARCH=slc6\_amd64\_gcc700 환경변수를 이용하여 작업공간을 생성하고 src 디렉토리로 이동합니다.
+위 메시지를 참고하여 사용 중인 UI 서버(cms-ui.sdfarm.kr, AlmaLinux 9)에서 SLC6 컨테이너 환경으로 들어갑니다. 또한, SCRAM\_ARCH=slc6\_amd64\_gcc700 환경변수를 이용하여 작업공간을 생성하고 src 디렉토리로 이동합니다.
 
 ```bash
-ssh ui10
-singularity shell -i -p /cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el6:latest
+cmssw-el6
 SCRAM_ARCH=slc6_amd64_gcc700 cmsrel CMSSW_10_2_9
 cd CMSSW_10_2_9
 cd src
