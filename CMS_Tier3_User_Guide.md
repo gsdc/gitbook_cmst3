@@ -95,7 +95,7 @@ MobaXterm 프로그램은 사용자 본인이 직접 홈페이지에서 파일�
 
 ## 2. 초기 환경 설정
 
-*여기서는 접속 후 초기 설정에 관한 내용입니다. 리눅스 환경을 처음 써보시는 경우 아래의 환경설정을 따라하시는 것을 추천드립니다. 필수적인 것은 아니며 본인의 취향대로 설정하셔도 무방합니다.*
+*여기서는 접속 후 초기 설정에 관한 내용입니다. 첫 접속 후 **OTP 토큰 등록은 반드시** 진행해야 하며, 그 외의 환경설정은 리눅스 환경을 처음 써보시는 경우 따라하시는 것을 추천드립니다. (OTP 외의 설정은 본인의 취향대로 하셔도 무방합니다.)*
 
 ### OTP 토큰 등록
 
@@ -264,18 +264,18 @@ scram list CMSSW
 CMSSW 버전을 확인한 후에 다음 명령어로 CMSSW 작업 디렉토리를 생성할 수 있습니다.
 
 ```bash
-## SCRAM_ARCH를 별도로 지정하는 경우,
-export SCRAM_ARCH=slcX_amd64_gccXXX
-## 작업 디렉토리 생성
-cmsrel CMSSW_10_4_0
+## SCRAM_ARCH 지정 (cms-ui.sdfarm.kr, EL9)
+export SCRAM_ARCH=el9_amd64_gcc12
+## 작업 디렉토리 생성 (CMSSW_X_Y_Z 는 scram list CMSSW 로 확인한 버전)
+cmsrel CMSSW_X_Y_Z
 ### 디렉토리 이름을 지정할 경우,
-scram p -n workspace CMSSW CMSSW_10_4_0
+scram p -n workspace CMSSW CMSSW_X_Y_Z
 ```
 
 작업 디렉토리가 생성되면 해당 디렉토리를 이용하여 환경변수를 설정할 수 있습니다. 이를 실행하여야 CRAB이 사용가능합니다.
 
 ```bash
-cd CMSSW_10_4_0
+cd CMSSW_X_Y_Z
 cd src
 cmsenv
 ```
@@ -319,9 +319,10 @@ Rucio는 ATLAS실험에서 데이터셋 관리를 위해 작성된 데이터 관
 ## No cmsenv environment
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 source /cvmfs/cms.cern.ch/rucio/setup.sh
-export RUCIO_USER=$(whoami)
+## RUCIO_USER에는 CERN ID를 지정합니다.
+export RUCIO_USER=[CERN ID]
 
-## or T3_KR_KISTI에서는 위 명령어를 다음 예약어를 설정하여 사용 중입니다.
+## or T3_KR_KISTI에서는 위 명령어를 다음 예약어로 설정하여 사용 중입니다. (KISTI ID를 RUCIO_USER로 사용하므로 CERN ID와 KISTI ID가 같은 경우에만 사용하세요.)
 ### rucioenv는 cmsenv 설정 후에는 작동하지 않습니다. 
 ### 별개의 세션(신규 접속)에서 실행하는 것을 추천드립니다.
 rucioenv
@@ -461,7 +462,7 @@ CPU 코어들은 HTCondor 작업 관리자를 이용하여 자원을 배치하�
 
 또한, 다른 그룹 사용자의 작업이 없을 경우에는 2,288개를 넘게 사용할 수 있습니다. 하지만, KIAF 사용자가 작업을 제출할 경우 KIAF 몫인 1696개의 코어를 자동으로 반납하며 반납된 작업 슬롯에서 실행되던 작업은 취소되어 대기열에 들어갑니다.
 
-자세한 사용방법은 **5. HTCondor를 이용한 배치 작업 수행** 장 참고해주시기 바랍니다.
+자세한 사용방법은 **4. 배치 작업 사용하기 (HTCondor 기초)** 장과 **5. HTCondor를 이용한 배치 작업 수행** 장을 참고해주시기 바랍니다.
 
 #### GPU 자원
 
@@ -530,7 +531,7 @@ HTCondor는 우리 CMS Tier-3에서 제공하는 배치 시스템입니다. 해�
 #### HTCondor 사용시 알아둬야하는 부분
 
 * 클러스터 내부(UI, WN)에서는 permanent 스토리지를 /xrd 디렉토리로 바로 사용하면 됩니다. (예: /xrd/store/user/\[ID]/...) 이전에 사용하던 root://cms-xrdr.private.lo:2094 접두어는 더 이상 사용하지 않습니다.
-* 외부에서 KISTI 저장소에 접근을 하려면 root://cms-xrdr.sdfarm.kr:1094 를 사용하여야 합니다.
+* 외부에서 KISTI 저장소에 접근을 하려면 root://cms-xrdr.sdfarm.kr:1094 (XRootD) 또는 davs://cms-xrdr.sdfarm.kr:1094 (WebDAV) 를 사용하여야 합니다.
   * 이 경로는 사용자 프록시 인증서가 꼭 필요합니다.  (voms-proxy-init 명령어 참고)
   * 실행 스크립트에서 인증서를 /tmp로 보내거나 작업디렉토리($\_CONDOR\_SCRATCH\_DIR)를 인증서 보관 디렉토리로 지정하여야 합니다.
 
@@ -642,9 +643,9 @@ JobBatchName = condorTestJobs
 # 바이너리 실행 파일을 입력하기도 하지만, 
 # 일반적으로 실행파일의 환경설정을 위해 Bash 스크립트 파일을 넣습니다.
 executable = test.sh
-#### universe는 일반적인 경우는 vanilla를 설정합니다.
-# 컨테이너를 실행하기 위한 container 유니버스, docker를 위한 docker 유니버스 등도 존재합니다.
-# 각각의 유니버스들은 해당 프로그램 실행을 위한 환경설정을 지원합니다.
+#### universe는 작업 실행 환경을 지정합니다.
+# 기본값은 vanilla이며, 컨테이너를 실행하기 위한 container 유니버스 등도 존재합니다.
+# KISTI CMS Tier-3에서는 작업 OS를 지정할 수 있는 container 유니버스를 권장합니다. (아래 '작업 실행 OS 지정' 참고)
 universe   = vanilla
 #### arguments는 프로그램의 인자를 입력합니다.
 # 여기서 사용된 $(Process)는 제출된 작업의 Process Id입니다.
@@ -697,7 +698,8 @@ transfer_output_remaps = "result.root = result_$(Hostname).root"
 #notification = Error
 #notify_user = [본인 이메일 주소]
 
-### Group Account 정보
+### Group Account 정보 (통합팜 사용을 위해 반드시 필요)
+accounting_group = group_cms
 
 #queue 13
 
@@ -856,7 +858,8 @@ batch_name = kisti batch test
 executable = run.sh
 universe = container
 
-container_image = /cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el9:latest
+## 작업 공간을 만든 OS(SLC6, CMSSW_10_2_9)에 맞추어 이미지를 지정합니다.
+container_image = /cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el6:latest
 getenv = True
 arguments = $(DATAFile)
 
@@ -875,7 +878,7 @@ accounting_group = group_cms
 queue DATAFile from filelist.txt
 ```
 
-위 작업은 filelist.txt을 읽어 한줄씩 $(DATAFile) 변수에 대입하며 하나씩 실행됩니다. 총 입력 파일이 3개이므로 총 3개의 작업이 제출됩니다.
+위 작업은 filelist.txt을 읽어 한줄씩 $(DATAFile) 변수에 대입하며 하나씩 실행됩니다. 따라서 filelist.txt에 적힌 파일 개수만큼 작업이 제출됩니다. (예: 입력 파일이 3개이면 3개의 작업)
 
 > **💡 참고**
 >
@@ -885,7 +888,7 @@ WN에서 run.sh 스크립트를 통해 실행이 되며 인자로 $(DATAFile)이
 
 accounting\_group은 통합팜에서 작업을 실행하기 위해 필요합니다.
 
-container universe는 apptainer 컨테이너 런타임 활용을 위해서 사용됩니다. 사용되는 이미지는 .sif 포맷이나 일반 디렉토리(혹은  /cvmfs)를 지정할 수 있습니다.
+container universe는 apptainer 컨테이너 런타임 활용을 위해서 사용됩니다. 사용되는 이미지는 .sif 포맷이나 일반 디렉토리(혹은  /cvmfs)를 지정할 수 있습니다. 이 예제는 SLC6 환경(cmssw-el6)에서 작업 공간을 만들었으므로 osgvo-el6 이미지를 사용합니다. EL9용 CMSSW로 작업 공간을 만들었다면 osgvo-el9 이미지를 지정하세요.
 
 > **💡 참고**
 >
@@ -894,7 +897,6 @@ container universe는 apptainer 컨테이너 런타임 활용을 위해서 사�
 ### 참고문헌
 
 1. KISTIBatch GitHub Page : [https://github.com/geonmo/KISTIBatch](https://github.com/geonmo/KISTIBatch)
-2.
 
 ---
 
@@ -1019,7 +1021,7 @@ xrdcp root://cmsxrootd.fnal.gov//store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_
 
 > **💡 참고**
 >
-> 현재 CMS AAA는 가장 빠른 사이트를 검색하는 등의 추가적인 기능이 제공되지 않고 있습니다. 따라서, 국내에 있는 다른 사이트에서 파일을 전송하고 싶어도 유럽이나 미국에서 파일을 전송할 가능성이 있습니다. 전송 받을 파일이 많아지면 데이터를 직접 탐색하여 접두어를 넣어 파일을 전송하도록 합시다.
+> 현재 CMS AAA는 가장 빠른 사이트를 검색하는 등의 추가적인 기능이 제공되지 않고 있습니다. 따라서, 국내에 있는 다른 사이트에서 파일을 전송하고 싶어도 유럽이나 미국에서 파일을 전송할 가능성이 있습니다. 전송 받을 파일이 많다면 아래 '2. 데이터셋 전송 요청'의 Rucio를 이용하여 데이터셋 전송을 요청하시기 바랍니다.
 
 ### 2. 데이터셋 전송 요청
 
@@ -1284,7 +1286,7 @@ Google Sheet를 이용하여 사용자들의 데이터 사용량 확인이 가�
 
 ### 데이터 쓰기 방법
 
-UI 서버 및 WN의 /xrd 공간을 확인하시면 데이터 파일들의 경로와 위치 정보를 아실 수 있습니다. 일반적으로 사용자는 /xrd 공간 이후 어느 공간이든 사용이 가능하지만 다음과 같은 구조로 데이터들을 저장하고 있습니다.
+UI 서버 및 WN의 /xrd 공간을 확인하시면 데이터 파일들의 경로와 위치 정보를 아실 수 있습니다. 개인 데이터는 /xrd/store/user/[CERN ID] 에 저장하시고, /xrd/store/mc · data · himc 같은 공용 데이터셋 공간에는 파일을 쓰거나 삭제하지 마시기 바랍니다. 전체 디렉토리 구조는 아래 '디렉토리 정보'를 참고하시기 바랍니다.
 
 ##### cp 명령어로 복사하기
 
@@ -1405,7 +1407,7 @@ config.Site.storageSite = T2_KR_KISTI
 
 > **❗ 중요**
 >
-> T3\__KR\_KISTI에  저장된 데이터는 더이상 CRAB 작업을 수행할 수 없습니다. CRAB 활용이 필요하다면 해당 데이터셋을 반드시 T2\_KR\_KISTI로 저장하세요._
+> T3\_KR\_KISTI에 저장된 데이터는 더이상 CRAB 작업을 수행할 수 없습니다. CRAB 활용이 필요하다면 해당 데이터셋을 반드시 T2\_KR\_KISTI로 저장하세요.
 
 #### 2차 작업이 필요한 경우
 
@@ -1445,7 +1447,7 @@ apptainer shell --nv pytorch_23.11-py3.sif
 
 ### Apptainer를 이용한 TensorFlow 사용하기
 
-현재 제공되는 GPU 서버에서는 tensorflow를 바로 실행하실 수 없습니다. Singularity 가상 환경을 추천드립니다.
+현재 제공되는 GPU 서버에서는 tensorflow를 바로 실행하실 수 없습니다. Apptainer(구 Singularity) 컨테이너 환경을 추천드립니다.
 
 ```
 ## CMS GPU 서버에서 실행하세요.
@@ -1542,7 +1544,7 @@ jupyter notebook --no-browser --ip 0.0.0.0 --port XXXX
 
 *유저들의 질의사항을 기록하여 비슷한 문제를 겪는 사용자들에게 답을 줄 수 있도록 안내해드리는 페이지입니다.*
 
-#### 1. scram build시 컴파일 에
+#### 1. scram build시 컴파일 에러가 나요!
 
 ![컴파일 에러가 발생하는 경우가 있습니다.](/wiz/api/portal.gsdcadmin.manual.image/download?community=CMS&path=faq-scram-build-error.png)
 
@@ -1571,7 +1573,7 @@ jupyter notebook --no-browser --ip 0.0.0.0 --port XXXX
 
 ```
 
-분석 데이터 파일이 KISTI가 아니라 외부의 있는 경우 뿐만 아니라 premixing 등에 사용되는 pileup event가 외부 사이트에 있을 경우에도 속도가 매우 떨어지게 됩니다. 해결방법은 해당 데이터들을 사이트 관리자의 도움을 받아 KISTI로 전송하는 것입니다.
+분석 데이터 파일이 KISTI가 아니라 외부의 있는 경우 뿐만 아니라 premixing 등에 사용되는 pileup event가 외부 사이트에 있을 경우에도 속도가 매우 떨어지게 됩니다. 해결방법은 해당 데이터들을 KISTI로 전송하는 것입니다. **7. 데이터 전송 및 데이터셋 요청** 장의 Rucio로 데이터셋 전송을 요청하시거나, 어려운 경우 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 문의해 주시기 바랍니다.
 
 (2)  머신 상태가 불량한 경우,
 
@@ -1597,7 +1599,7 @@ jupyter notebook --no-browser --ip 0.0.0.0 --port XXXX
 
 #### 4. /xrd/store/user/\[ID] 디렉토리가 없어요!
 
-/xrd/store/user/\[ID] 디렉토리는 CRAB 작업 제출을 통해 생성이가능합니다. CRAB3 사용관련 페이지를 참고해주세요.
+/xrd/store/user/\[ID] 디렉토리는 CRAB 작업 결과를 T3\_KR\_KISTI에 저장하면 자동으로 생성됩니다. (**9. CRAB3 사용 관련** 장 참고) CRAB을 사용하지 않는데 디렉토리가 없다면 [포털 티켓팅 시스템(기술지원 > 문의하기)](https://portal.gsdc.kr/support/ticketing)으로 생성을 요청해 주시기 바랍니다.
 
 #### 5. UI 서버에서 작업을 하려고 하는데 타이핑도 늦어질 정도로 느려요!
 
