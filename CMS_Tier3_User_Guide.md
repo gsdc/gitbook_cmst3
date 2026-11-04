@@ -405,6 +405,30 @@ GitHub에 계정 가입 후 로그인을 한 후 \[프로필 사진] - \[계정 
 
 등록이 완료되면 해당 저장소의 권한 설정에 따라 내용 수정 (commit)후 업로드(git push)가 가능해집니다. 물론, 저장소에 대한 권한이 없다면 불가능하오니 참고 바랍니다.
 
+### GitHub SSH 접속을 443 포트로 변경하기
+
+UI 서버에서는 외부로 나가는 SSH 기본 포트(22번)가 막혀 있어 `git@github.com:...` 형식의 SSH 주소로 git clone, git push 를 하면 접속이 되지 않습니다. 이 경우 GitHub가 제공하는 443 포트용 SSH 서버(ssh.github.com)를 사용하도록 설정하시면 됩니다.
+
+UI 서버의 `~/.ssh/config` 파일에 아래 내용을 추가합니다. (파일이 없으면 새로 만듭니다.)
+
+```
+Host github.com
+    Hostname ssh.github.com
+    Port 443
+    User git
+```
+
+```bash
+## 설정 파일 권한 지정
+chmod 600 ~/.ssh/config
+## 접속 확인
+ssh -T git@github.com
+```
+
+처음 접속할 때 호스트 키 확인 메시지가 나오면 `yes`를 입력합니다. 아래와 같은 메시지가 나오면 정상적으로 설정된 것입니다. 이후에는 기존과 동일하게 `git@github.com:...` 주소를 그대로 사용하시면 됩니다.
+
+> Hi [GitHub ID]! You've successfully authenticated, but GitHub does not provide shell access.
+
 ### 참고문헌
 
 1. CERN CA 홈페이지([https://ca.cern.ch/ca/Help/?kbid=024010](https://ca.cern.ch/ca/Help/?kbid=024010))
@@ -412,6 +436,7 @@ GitHub에 계정 가입 후 로그인을 한 후 \[프로필 사진] - \[계정 
 3. CMS 인증서 발급 안내 TWiki page ([https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideLcgAccess](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideLcgAccess))
 4. CMS 워크북 TWiki Page\
    ([https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook))
+5. GitHub Docs - Using SSH over the HTTPS port ([https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port](https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port))
 
 ---
 
