@@ -1007,28 +1007,7 @@ T2_US_Wisconsin
 T3_KR_KISTI
 ```
 
-저장된 사이트의 이름을 확인하였으며 해당 사이트의 prefix를 확인합니다.
-
-```
-cat /cvmfs/cms.cern.ch/SITECONF/T2_US_Purdue/PhEDEx/storage.xml | grep "root://"
-```
-
-> ```
->   <lfn-to-pfn protocol="xrootd" destination-match=".*" path-match="/+store/(.*)" result="root://cmsxrootd.fnal.gov//store/$1"/>
->   <lfn-to-pfn protocol="root" destination-match=".*" path-match="/+store/(.*)" result="root://xrootd.rcac.purdue.edu//store/$1"/>
->   <pfn-to-lfn protocol="root" destination-match=".*" path-match="root://xrootd.rcac.purdue.edu//store/(.*)" result="/$1"/>
->
-> ```
-
-위 경우 xrootd 프로토콜은
-
-> [root://xrootd.rcac.purdue.edu//store/$1](root://xrootd.rcac.purdue.edu/store/$1)
-
-인 것을 알 수 있습니다. 해당 prefix를 이용하여 파일을 전송해봅시다.
-
-```
-xrdcp root://xrootd.rcac.purdue.edu//store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano1June2019_102X_mc2017_realistic_v7-v1/60000/04323B9F-4B66-2D44-89DE-644E8C48246D.root .
-```
+파일이 저장된 사이트를 확인하였습니다. 아래 CMS AAA 기능을 이용하면 사이트 위치와 상관없이 파일을 전송할 수 있습니다.
 
 ##### 데이터 자동 탐색 기능(CMS AAA) 사용하기
 
@@ -1389,7 +1368,7 @@ process.source = cms.Source("PoolSource",
 
 > **❗ 중요**
 >
-> 위 공간은 PhEDEx를 이용하여 데이터셋을 신청하여 파일을 전송하실 수 있습니다. 그외에 일반 유저가 해당 디렉토리에 파일을 쓰거나 삭제하지 않도록 주의해주시기 바랍니다.
+> 위 공간은 Rucio를 이용하여 데이터셋을 신청하여 파일을 전송하실 수 있습니다. (**7. 데이터 전송 및 데이터셋 요청** 장 참고) 그외에 일반 유저가 해당 디렉토리에 파일을 쓰거나 삭제하지 않도록 주의해주시기 바랍니다.
 >
 > 다시 한번 말씀드리지만, 해당 공간의 파일을 수정하거나 삭제하지 않도록 주의를 기울여주시기 바랍니다.
 
