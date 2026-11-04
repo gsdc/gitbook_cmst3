@@ -304,8 +304,10 @@ crab checkwrite --site=T2_KR_KISTI
 crab checkwrite --site=T3_KR_KISTI
 ```
 
-> Checkwrite Result:\
-> Success: Able to write in /store/user/geonmo on site T2\_KR\_KISTI
+```
+Checkwrite Result:
+Success: Able to write in /store/user/geonmo on site T2_KR_KISTI
+```
 
 만약, 쓰기가 불가능하시면  [cmst3-support@kisti.re.kr](mailto:cmst3-support@kisti.re.kr) 로 이메일을 보내주시기 바랍니다.
 
@@ -325,29 +327,31 @@ export RUCIO_USER=$(whoami)
 rucioenv
 ```
 
-### /xrootd\_users 디렉토리 생성
+### 장기 보관 스토리지(/xrd) 사용
 
-KISTI CMS Tier-3에서 제공해드리는 장기 보관용 저장소인 /xrootd 공간은 OS에서의 직접 접속을 금지하고 대신 xrdfs, gfal-copy 등의 전송 프로그램을 쓰도록 안내드리고 있습니다. 하지만, 사용자의 편의성을 증대하기 위해 신청자를 대상으로 /xrootd\_users 디렉토리에 본인의 저장소 공간을 UI 서버들에 마운트를 해드리고 있습니다. (WN에는 마운트해드리지 않습니다.)
+KISTI CMS Tier-3에서 제공해드리는 장기 보관용 저장소(permanent 스토리지)는 클러스터 내부(UI 서버 및 WN)에 /xrd 디렉토리로 연결되어 있습니다. 예전처럼 /xrootd\_users 디렉토리 마운트를 별도로 신청하실 필요 없이, /xrd 경로를 일반 디렉토리처럼 사용하시면 됩니다.
 
-신청을 하실 때에는 CERN 계정과 KISTI 계정 정보를 알려주셔야 합니다. CERN 컴퓨팅 계정을 잘 모르실 경우 아래의 CRAB 명령어를 통해 확인하실 수 있습니다.
+개인 데이터는 /xrd/store/user/[CERN ID] 디렉토리에 저장합니다. 본인의 CERN 컴퓨팅 계정(CERN ID)을 잘 모르실 경우 아래의 CRAB 명령어를 통해 확인하실 수 있습니다.
 
 ```bash
 crab checkusername
 ```
 
-> Retrieving DN from proxy... \
-> DN is: /C=KR/O=KISTI/O=KISTI/CN=58079576 Geonmo Ryu Retrieving username for this DN... \
-> username is geonmo
+```
+Retrieving DN from proxy...
+DN is: /C=KR/O=KISTI/O=KISTI/CN=58079576 Geonmo Ryu
+Retrieving username for this DN...
+username is geonmo
+```
 
-위 명령어로 확인한 CERN 계정과 KISTI 계정을 관리자에게 보내주시면 /xrootd\_users/\[userid] 디렉토리 밑에 사용자 저장소를 마운트해드립니다.
+```bash
+ls /xrd/store/user/[CERN ID]
+cp result.root /xrd/store/user/[CERN ID]/
+```
 
 > **💡 참고**
 >
-> 디렉토리가 생성된 이후에는 일반 디렉토리를 사용하시듯이 cp, rm 명령어로 파일을 관리하시면 됩니다. 단, mv 명령어는 자제해주시기 바랍니다.
-
-해당 디렉토리는 사용자가 접근하면 자동으로 마운트되도록 autofs로 설정되어 있습니다. 하지만, 마운트가 안된 상태에서 여러 차례 접근을 시도하면 마운트 충돌로 인해 아래의 메시지가 표시되면서 사용이 불가능해집니다. 아래의 메시지가 나타나면 즉시 관리자에게 연락을 주시기 바랍니다.
-
-> 전송 종료지점이 연결되어 있지 않습니다 / Transport endpoint is not connected
+> /xrd 디렉토리의 파일은 일반 디렉토리를 사용하시듯이 cp, rm 명령어로 관리하시면 됩니다. 단, mv 명령어는 자제해주시기 바랍니다.
 
 ### GitHub 사용을 위한 공개키 등
 
@@ -434,8 +438,7 @@ ssh -T git@github.com
 1. CERN CA 홈페이지([https://ca.cern.ch/ca/Help/?kbid=024010](https://ca.cern.ch/ca/Help/?kbid=024010))
 2. VO CMS 가입 홈페이지([https://lcgvoms24.cern.ch:8443/voms/cms/user/home.action](https://lcgvoms24.cern.ch:8443/voms/cms/user/home.action))
 3. CMS 인증서 발급 안내 TWiki page ([https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideLcgAccess](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideLcgAccess))
-4. CMS 워크북 TWiki Page\
-   ([https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook))
+4. CMS 워크북 TWiki Page ([https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook))
 5. GitHub Docs - Using SSH over the HTTPS port ([https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port](https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port))
 
 ---
@@ -489,7 +492,7 @@ ssh [CMS GPU Server]
 >
 > 해당 공간은 UI 및 WN에서 접근이 가능하지만 **파일 생성 후 7일**이 지나면 모든 파일이 삭제됩니다.
 
-##### 3./xrootd (장기 보관 스토리지)
+##### 3. /xrd (장기 보관 스토리지)
 
 CMS Tier-3는  KCMS 연구자들에게 독점적인 1004TB 자원을 제공하고 있습니다. 이 중, 604TB는 SAN 스토리지이며, 400TB는 NAS 스토리지를 통하여 제공되고 있습니다.
 
@@ -553,8 +556,7 @@ slot2_10@cms-t3-wn3001.sdfarm.kr LINUX      X86_64 Claimed   Busy      1.000   2
 
 > **❗ 중요**
 >
-> CMS 작업은 아무런 옵션이 없이 제출될 경우 \
-> CPU 1개, 메모리 2933MB를 사용하도록 설정됩니다. 이 자원 요구량기보다 더 크게 요청할 경우 자원 확보가 용이하지 않아 작업이 실행되지 않을 수 있으니 참고 바랍니다.
+> CMS 작업은 아무런 옵션이 없이 제출될 경우 CPU 1개, 메모리 2933MB를 사용하도록 설정됩니다. 이 자원 요구량기보다 더 크게 요청할 경우 자원 확보가 용이하지 않아 작업이 실행되지 않을 수 있으니 참고 바랍니다.
 
 ### condor\_q
 
@@ -742,9 +744,9 @@ accounting_group = group_cms
 
 ZZ샘플 데이터 파일 한개를 사용하여 데이터셋 정보를 확인합니다. 해당 파일의 위치는 다음과 같습니다.
 
-> /xrootd/store/mc/RunIIFall17NanoAODv4/ZZ\_TuneCP5\_13TeV-pythia8/NANOAODSIM/PU2017\_12Apr2018\_Nano14Dec2018\_102X\_mc2017\_realistic\_v6-v1/30000/E13A1753-58AD-2E4A-9D47-4BA07BB3FD64.root
+> /xrd/store/mc/RunIIFall17NanoAODv4/ZZ\_TuneCP5\_13TeV-pythia8/NANOAODSIM/PU2017\_12Apr2018\_Nano14Dec2018\_102X\_mc2017\_realistic\_v6-v1/30000/E13A1753-58AD-2E4A-9D47-4BA07BB3FD64.root
 
-CMS에서 사용되는 LFN(Logical File Name) 주소는 반드시 "**/store**"로 시작됩니다. 위에서는 /xrootd만 빼면 됩니다. 해당 LFN은 어느 사이트에서도 동일합니다.
+CMS에서 사용되는 LFN(Logical File Name) 주소는 반드시 "**/store**"로 시작됩니다. 위에서는 /xrd만 빼면 됩니다. 해당 LFN은 어느 사이트에서도 동일합니다.
 
 위 파일의 DataSet 및 Release 정보를 확인해봅시다.
 
@@ -787,14 +789,18 @@ HTCondor를 이용한 실습을 수행하기 위하여 간단한 CMSSW 분석 �
 git clone https://github.com/geonmo/KISTIBatch.git
 ```
 
-> Cloning into 'KISTIBatch'... \
-> remote: Enumerating objects: 72, done. \
-> remote: Counting objects: 100% (72/72), done. \
-> remote: Compressing objects: 100% (58/58), done. \
-> remote: Total 87 (delta 39), reused 37 (delta 14), pack-reused 15 Receiving objects: 100% (87/87), 21.25 KiB | 109.00 KiB/s, done. Resolving deltas: 100% (41/41), done. \
-> \
-> (base) \[geonmo@ui20 src]$ ls KISTIBatch/ \
-> LFNTool.py README.md filedialog.py filelist.txt getZMass.py gui.py run.sh setup.sh submit.jds test\_LFNTool.py
+```
+Cloning into 'KISTIBatch'...
+remote: Enumerating objects: 72, done.
+remote: Counting objects: 100% (72/72), done.
+remote: Compressing objects: 100% (58/58), done.
+remote: Total 87 (delta 39), reused 37 (delta 14), pack-reused 15
+Receiving objects: 100% (87/87), 21.25 KiB | 109.00 KiB/s, done.
+Resolving deltas: 100% (41/41), done.
+
+(base) [geonmo@ui20 src]$ ls KISTIBatch/
+LFNTool.py README.md filedialog.py filelist.txt getZMass.py gui.py run.sh setup.sh submit.jds test_LFNTool.py
+```
 
 각 파일들의 세부 설명은 GitHub 페이지를 참고해주시기 바랍니다.
 
@@ -817,34 +823,39 @@ sed -i 's/^/root:\/\/cmsxrootd.fnal.gov\//g' filelist.txt
 ./getZMass.py /xrd/store/mc/RunIIFall17NanoAODv4/ZZ_TuneCP5_13TeV-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/30000/8DC8188D-246C-6D41-A24A-78C0CBBC6F17.root
 ```
 
-> (base) \[geonmo@ui10 KISTIBatch]$ ls -l \*.root \
-> -rw-r--r--. 1 geonmo geonmo 3780 Sep 2 14:05 zcandmass.root
+```
+(base) [geonmo@ui10 KISTIBatch]$ ls -l *.root
+-rw-r--r--. 1 geonmo geonmo 3780 Sep 2 14:05 zcandmass.root
+```
 
 #### HTCondor 작업 제출 명세 작성
 
 HTCondor에 작업을 동시(concurrent)에 실행시키려면 HTCondor 문법에 맞게 작업 제출 파일을 작성하여야 합니다. 해당 제출 명세의 예제로 submit.jds 파일을 동봉하였습니다.
 
-> batch\_name = kisti batch test \
-> executable = run.sh \
-> universe = container
->
-> container\_image =  /cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el9:latest\
-> getenv = True\
-> arguments = $(DATAFile)
->
-> transfer\_input\_files = getZMass.py , /tmp/x509up\_u556800422, LFNTool.py\
-> should\_transfer\_files = YES \
-> when\_to\_transfer\_output = ON\_EXIT
->
-> output = jo&#x62;_$(Process).out_ \
-> _error = job_$(Process).err \
-> log = condor.log
->
-> transfer\__output\_files = zcandmass.root_ \
-> _transfer\_output\_remaps = "zcandmass.root = zcandmass\__$(Process).root"\
-> accounting\_group=group\_cms\
-> +SingularityBind = "/cvmfs,/etc/condor,/cms,/cms\_scratch,/var/lib/condor,/run/user"\
-> queue DATAFile from filelist.txt
+**📄 submit.jds**
+```bash
+batch_name = kisti batch test
+executable = run.sh
+universe = container
+
+container_image = /cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el9:latest
+getenv = True
+arguments = $(DATAFile)
+
+transfer_input_files = getZMass.py , /tmp/x509up_u556800422, LFNTool.py
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+output = job_$(Process).out
+error = job_$(Process).err
+log = condor.log
+
+transfer_output_files = zcandmass.root
+transfer_output_remaps = "zcandmass.root = zcandmass_$(Process).root"
+accounting_group = group_cms
++SingularityBind = "/cvmfs,/etc/condor,/cms,/cms_scratch,/var/lib/condor,/run/user"
+queue DATAFile from filelist.txt
+```
 
 위 작업은 filelist.txt을 읽어 한줄씩 $(DATAFile) 변수에 대입하며 하나씩 실행됩니다. 총 입력 파일이 3개이므로 총 3개의 작업이 제출됩니다.
 
@@ -953,8 +964,7 @@ xrdcp root://eoscms.cern.ch//store/mc/SAM/GenericTTbar/AODSIM/CMSSW_9_2_6_91X_mc
 
 #### 데이터 파일의 위치를 알지 못할 때
 
-데이터 파일의 위치를 알지 못할 때에는 데이터의 위치를 찾아서 전송을 하거나 \
-데이터 파일의 위치와 상관 없이 CMS AAA(Any Data, Anytime, Anywhere) 기능을 이용하여 데이터를 전송할 수 있습니다.
+데이터 파일의 위치를 알지 못할 때에는 데이터의 위치를 찾아서 전송을 하거나 데이터 파일의 위치와 상관 없이 CMS AAA(Any Data, Anytime, Anywhere) 기능을 이용하여 데이터를 전송할 수 있습니다.
 
 ##### 데이터 파일 찾기
 
@@ -965,13 +975,15 @@ dasgoclient --query="site file=/store/mc/RunIIFall17NanoAODv5/QCD_HT1000to1500_T
 
 ```
 
-> T1\_RU\_JINR\_Disk \
-> T1\_US\_FNAL\_Buffer \
-> T1\_US\_FNAL\_MSS \
-> T2\_KR\_KISTI \
-> **T2\_US\_Purdue** \
-> T2\_US\_Wisconsin \
-> T3\_KR\_KISTI
+```
+T1_RU_JINR_Disk
+T1_US_FNAL_Buffer
+T1_US_FNAL_MSS
+T2_KR_KISTI
+T2_US_Purdue
+T2_US_Wisconsin
+T3_KR_KISTI
+```
 
 저장된 사이트의 이름을 확인하였으며 해당 사이트의 prefix를 확인합니다.
 
@@ -1243,7 +1255,7 @@ USAGE:
 
 ## 8. 스토리지 접근 방법
 
-*/xrootd 스토리지에 저장된 데이터에 접근하는 방법에 대하여 설명드립니다.*
+*/xrd(장기 보관) 스토리지에 저장된 데이터에 접근하는 방법에 대하여 설명드립니다.*
 
 ### 데이터 사용량 확인
 
@@ -1253,22 +1265,22 @@ Google Sheet를 이용하여 사용자들의 데이터 사용량 확인이 가�
 
 ### 데이터 쓰기 방법
 
-UI서버들의 /xrootd 공간을 확인하시면 데이터 파일들의 경로와 위치 정보를 아실 수 있습니다. 일반적으로 사용자는 /xrootd공간 이후 어느 공간이든 사용이 가능하지만 다음과 같은 구조로 데이터들을 저장하고 있습니다.
+UI 서버 및 WN의 /xrd 공간을 확인하시면 데이터 파일들의 경로와 위치 정보를 아실 수 있습니다. 일반적으로 사용자는 /xrd 공간 이후 어느 공간이든 사용이 가능하지만 다음과 같은 구조로 데이터들을 저장하고 있습니다.
 
 ##### xrdcp 명령어 사용하기
 
-xrdcp는 xrootd 프로토콜을 이용한 데이터 전송 프로그램입니다. 사용방법은 scp와 매우 유사하지만 대상이 xrootd 프로토콜이어야 합니다. 테스트를 위해 CMS Tier-3 XRootD 디렉토리에 저장된 파일을 이용합니다. /xrootd 디렉토리는 각 UI 서버들에 마운트되어 있습니다.
+xrdcp는 xrootd 프로토콜을 이용한 데이터 전송 프로그램입니다. 사용방법은 scp와 매우 유사하지만 대상이 xrootd 프로토콜이어야 합니다. 테스트를 위해 CMS Tier-3 장기 보관 스토리지에 저장된 파일을 이용합니다. /xrd 디렉토리는 UI 서버와 WN에 연결되어 있습니다.
 
 ```bash
-[geonmo@ui20 geonmo]$ ls /xrootd/store/user/geonmo/dummy.dat 
-/xrootd/store/user/geonmo/dummy.dat
+[geonmo@ui20 geonmo]$ ls /xrd/store/user/geonmo/dummy.dat 
+/xrd/store/user/geonmo/dummy.dat
 [geonmo@ui20 geonmo]$ xrdcp -f /xrd/store/user/geonmo/dummy.dat /dev/null
 [100MB/100MB][100%][==================================================][100MB/s]  
 ```
 
 ##### xrdMigration.py 사용하기
 
-xrdMigration.py는 /cms/lda&#x70;_&#x68;ome,_ /cms/scratch, /cms\_scratch에 저장된 데이터 파일들을 /xrootd/store/user/\[USERID]로 옮기기 위해 개발되었습니다. 해당 /cms 디렉토리들의 경로를 지정하면 동일한 경로명으로 /xrootd 디렉토리로 옮겨줍니다.
+xrdMigration.py는 /cms/lda&#x70;_&#x68;ome,_ /cms/scratch, /cms\_scratch에 저장된 데이터 파일들을 /xrd/store/user/\[USERID]로 옮기기 위해 개발되었습니다. 해당 /cms 디렉토리들의 경로를 지정하면 동일한 경로명으로 /xrd 디렉토리로 옮겨줍니다.
 
 **▶ 옵션 설명**
 ```bash
@@ -1279,15 +1291,14 @@ xrdcp -p /cms/ldap_home/geonmo/migration_test/subdir root://cms-xrdr.private.lo:
 xrdcp: /cms/ldap_home/geonmo/migration_test/subdir is a directory.
 ```
 
--d                     : 복사 후 checksum 값 비교후 정상이면 기존 파일 삭제\
--c \[CERN ID] : CERN ID를 기입하여 실행 속도 향상. -c 옵션이 없을 경우 CERN CRIC에 질의를 하여 사용자의 인증서 정보를 이용하여 CERN ID 정보를 가져오기 때문에 약 1분 가량의 지연시간이 발생합니다.
+* `-d` : 복사 후 checksum 값 비교후 정상이면 기존 파일 삭제
+* `-c [CERN ID]` : CERN ID를 기입하여 실행 속도 향상. -c 옵션이 없을 경우 CERN CRIC에 질의를 하여 사용자의 인증서 정보를 이용하여 CERN ID 정보를 가져오기 때문에 약 1분 가량의 지연시간이 발생합니다.
 
 xrdMigration.py 스크립트를 사용하면 새로 생성된 디렉토리의 캐쉬 정보를 리셋을 합니다. 따라서, 디렉토리를 생성하였으나 실제로 없는 디렉토리라면서 접근이 안되는 현상이 사라집니다. 되도록 xrdMigration.py를 사용하길 추천드립니다.
 
 > **❗ 중요**
 >
-> /xrootd 디렉토리에서는 절대로 mv 명령어를 사용하시면 안됩니다. 현재 시스템 상으로 mv를 하면 파일이 사라질 가능성이 존재합니다. \
-> (최근 파일의 경우 더더욱 확률이 높습니다.)
+> /xrd 디렉토리에서는 절대로 mv 명령어를 사용하시면 안됩니다. 현재 시스템 상으로 mv를 하면 파일이 사라질 가능성이 존재합니다. (최근 파일의 경우 더더욱 확률이 높습니다.)
 
 ##### 데이터 접근 방식
 
@@ -1348,15 +1359,15 @@ process.source = cms.Source("PoolSource",
 
 ### 디렉토리 정보
 
-##### /xrootd/store/mc
+##### /xrd/store/mc
 
 * 위 공간은 CMS DataSet 중 MC 샘플들이 저장되는 공간입니다.
 
-##### /xrootd/store/data
+##### /xrd/store/data
 
 * 위 공간은 CMS Dataset 중 Real Data가 저장되는 공간입니다.
 
-##### /xrootd/store/himc
+##### /xrd/store/himc
 
 * 위 공간은 HeavyIon MC 샘플이 저장됩니다.
 
@@ -1366,16 +1377,16 @@ process.source = cms.Source("PoolSource",
 >
 > 다시 한번 말씀드리지만, XRootD 시스템의 기능의 한계로 인하여 일반 유저가 해당 공간에 대해 쓰기 권한을 가지고 있습니다. 해당 공간에 대해서 삭제 기능을 수행하지 않도록 주의를 기울여주시기 바랍니다.
 
-##### /xrootd/store/user
+##### /xrd/store/user
 
 * 위 공간은 개별 사용자들의 데이터 샘플을 장기 보관하는 공간입니다.
-* 각 사용자들은 해당 공간에 데이터를 집어넣기 위해 gfal-copy, xrdcp 명령어를 사용하거나 UI 서버에서 /xrootd\_user/\[ID]/xrootd 디렉토리를 이용하여 데이터를 복사할 수 있습니다.
+* 각 사용자들은 클러스터 내부(UI, WN)에서 cp 명령어로 /xrd/store/user/[CERN ID] 디렉토리에 데이터를 복사하거나, 외부에서는 gfal-copy, xrdcp 명령어를 사용할 수 있습니다.
 
 > **⚠️ 주의**
 >
-> /xrootd\_user 공간을 사용하실 때에는 mv 같은 암시적인 삭제 기능을 수행하지 않도록 주의해주시기 바랍니다. 해당 공간에서 mv를 실행하면 확률적으로 파일이 손실됩니다. 따라서, 꼭 cp로 복사한 후 복사파일들을 확인한 후 rm으로 지워주시기 바랍니다.
+> /xrd 공간을 사용하실 때에는 mv 같은 암시적인 삭제 기능을 수행하지 않도록 주의해주시기 바랍니다. 해당 공간에서 mv를 실행하면 확률적으로 파일이 손실됩니다. 따라서, 꼭 cp로 복사한 후 복사파일들을 확인한 후 rm으로 지워주시기 바랍니다.
 
-##### /xrootd/store/group
+##### /xrd/store/group
 
 위 공간은 KCMS 연구자들이 생산한 공용 데이터들을 저장하고 있습니다.
 
@@ -1391,7 +1402,7 @@ CRAB3의 자세한 설정은 [CRAB3 페이지](https://twiki.cern.ch/twiki/bin/v
 
 #### CRAB3 결과를 KISTI에 저장하기
 
-Tier-3에 결과파일을 저장하기 위해서는 아래 옵션을 사용합니다. 저장된 데이터셋은 /xrootd/store/user/\[CERN ID] 밑에서 확인하실 수 있습니다.
+Tier-3에 결과파일을 저장하기 위해서는 아래 옵션을 사용합니다. 저장된 데이터셋은 /xrd/store/user/\[CERN ID] 밑에서 확인하실 수 있습니다.
 
 **📄 crabConfig.py**
 ```python
@@ -1607,11 +1618,9 @@ jupyter notebook --no-browser --ip 0.0.0.0 --port XXXX
 * 정상적으로 마무리되면 이메일 주소로 리셋된 패스워드가 전송됩니다. 해당 패스워드로 접속을 하면 패스워드를 바로 변경할 수 있습니다.
 * 이후 다시 리셋을 할때에는 "/start" 명령을 클릭해야 합니다.
 
-#### 4. /xrootd/store/user/\[ID] 디렉토리와 /xrootd\_user/\[ID] 디렉토리가 없어요!
+#### 4. /xrd/store/user/\[ID] 디렉토리가 없어요!
 
-/xrootd\_user 디렉토리는 스토리지의 쓰기 관련한 작업을UI 서버에서 처리 할 수있도록 지원하기 위해 생성된 디렉토리입니다. 이 디렉토리는 관리자가 생성해주는디렉토리입니다. 관리자에게 CENRN Account ID와 함께 요청을 해주세요.
-
-/xrootd/store/user/\[ID] 디렉토리는 CRAB 작업 제출을 통해 생성이가능합니다. CRAB3 사용관련 페이지를 참고해주세요.
+/xrd/store/user/\[ID] 디렉토리는 CRAB 작업 제출을 통해 생성이가능합니다. CRAB3 사용관련 페이지를 참고해주세요.
 
 #### 5. UI 서버에서 작업을 하려고 하는데 타이핑도 늦어질 정도로 느려요!
 
