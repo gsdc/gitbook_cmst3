@@ -494,11 +494,13 @@ ssh cms-gpu01
 
 ##### 3. /xrd (장기 보관 스토리지)
 
-CMS Tier-3는  KCMS 연구자들에게 독점적인 1004TB 자원을 제공하고 있습니다. 이 중, 604TB는 SAN 스토리지이며, 400TB는 NAS 스토리지를 통하여 제공되고 있습니다.
+기존 XRootD 스토리지(/xrootd)는 **Lustre 볼륨**으로 변경되었으며, 클러스터 내부(UI 서버 및 WN)에 /xrd 디렉토리로 연결되어 있습니다. 장기 보관이 필요한 데이터는 cp 등 일반 명령어로 /xrd 아래(개인 데이터는 /xrd/store/user/[CERN ID])에 복사하시면 됩니다.
 
-스토리지로 제공되는 서버는 총 5대이며 각각 10Gbps NIC로 연결되어 있습니다. 따라서,이론적인  최대 대역폭은 50Gbps입니다.
+```bash
+cp -r /cms/ldap_home/[ID]/my_results /xrd/store/user/[CERN ID]/
+```
 
-각 스토리지 서버는 XRootD 프로그램을 통하여 통합되어 있습니다. 따라서, xrootd 명령어를 통해 파일을 복사하거나 삭제할 때 성능이 가장 좋습니다.
+외부에서 접근할 때는 아래 표의 XRootD(root://cms-xrdr.sdfarm.kr:1094) 또는 GSIFTP 주소를 사용합니다.
 
 GSIFTP 기능도 제공하기 때문에 PhEDEx 및 gfal util을 이용한 SRM 프로토콜 사용도 가능합니다. 하지만, xrootd와 gsiftp를 사용할 때 URL이 다르므로 주의하여야 합니다.
 
@@ -1070,7 +1072,7 @@ rucio add-rule cms:[DATASET] 1 T3_KR_KISTI
 ###CMSSW 디렉토리 내에서 cmsenv를 하였을 경우 작동 안될 가능성 있음.
 source /cvmfs/cms.cern.ch/cmsset_default.sh 
 source /cvmfs/cms.cern.ch/rucio/setup.sh 
-export RUCIO_ACCOUNT=[CERN ID]
+export RUCIO_USER=[CERN ID]
 voms-proxy-init --voms cms
 
 ### CERN과 KISTI ID가 같다면 다음 명령어로 바로 적용 가능합니다.
@@ -1305,34 +1307,14 @@ Google Sheet를 이용하여 사용자들의 데이터 사용량 확인이 가�
 
 UI 서버 및 WN의 /xrd 공간을 확인하시면 데이터 파일들의 경로와 위치 정보를 아실 수 있습니다. 일반적으로 사용자는 /xrd 공간 이후 어느 공간이든 사용이 가능하지만 다음과 같은 구조로 데이터들을 저장하고 있습니다.
 
-##### xrdcp 명령어 사용하기
+##### cp 명령어로 복사하기
 
-xrdcp는 xrootd 프로토콜을 이용한 데이터 전송 프로그램입니다. 사용방법은 scp와 매우 유사하지만 대상이 xrootd 프로토콜이어야 합니다. 테스트를 위해 CMS Tier-3 장기 보관 스토리지에 저장된 파일을 이용합니다. /xrd 디렉토리는 UI 서버와 WN에 연결되어 있습니다.
+기존 XRootD 스토리지(/xrootd)가 Lustre 볼륨(/xrd)으로 변경되었기 때문에, 장기 보관할 데이터는 일반 파일처럼 cp 명령어로 /xrd 에 복사하시면 됩니다.
 
 ```bash
-[geonmo@ui20 geonmo]$ ls /xrd/store/user/geonmo/dummy.dat 
-/xrd/store/user/geonmo/dummy.dat
-[geonmo@ui20 geonmo]$ xrdcp -f /xrd/store/user/geonmo/dummy.dat /dev/null
-[100MB/100MB][100%][==================================================][100MB/s]  
+cp -r /cms/ldap_home/[ID]/migration_test /xrd/store/user/[CERN ID]/
+ls -l /xrd/store/user/[CERN ID]/migration_test
 ```
-
-##### xrdMigration.py 사용하기
-
-xrdMigration.py는 /cms/lda&#x70;_&#x68;ome,_ /cms/scratch, /cms\_scratch에 저장된 데이터 파일들을 /xrd/store/user/\[USERID]로 옮기기 위해 개발되었습니다. 해당 /cms 디렉토리들의 경로를 지정하면 동일한 경로명으로 /xrd 디렉토리로 옮겨줍니다.
-
-**▶ 옵션 설명**
-```bash
-[geonmo@ui20 ~]$ xrdMigration.py -d -c geonmo /cms/ldap_home/geonmo/migration_test/
-Number of files is 1
-
-xrdcp -p /cms/ldap_home/geonmo/migration_test/subdir root://cms-xrdr.private.lo:2094//xrd/store/user/geonmo/migration_test/subdir
-xrdcp: /cms/ldap_home/geonmo/migration_test/subdir is a directory.
-```
-
-* `-d` : 복사 후 checksum 값 비교후 정상이면 기존 파일 삭제
-* `-c [CERN ID]` : CERN ID를 기입하여 실행 속도 향상. -c 옵션이 없을 경우 CERN CRIC에 질의를 하여 사용자의 인증서 정보를 이용하여 CERN ID 정보를 가져오기 때문에 약 1분 가량의 지연시간이 발생합니다.
-
-xrdMigration.py 스크립트를 사용하면 새로 생성된 디렉토리의 캐쉬 정보를 리셋을 합니다. 따라서, 디렉토리를 생성하였으나 실제로 없는 디렉토리라면서 접근이 안되는 현상이 사라집니다. 되도록 xrdMigration.py를 사용하길 추천드립니다.
 
 > **❗ 중요**
 >
@@ -1413,7 +1395,7 @@ process.source = cms.Source("PoolSource",
 >
 > 위 공간은 PhEDEx를 이용하여 데이터셋을 신청하여 파일을 전송하실 수 있습니다. 그외에 일반 유저가 해당 디렉토리에 파일을 쓰거나 삭제하지 않도록 주의해주시기 바랍니다.
 >
-> 다시 한번 말씀드리지만, XRootD 시스템의 기능의 한계로 인하여 일반 유저가 해당 공간에 대해 쓰기 권한을 가지고 있습니다. 해당 공간에 대해서 삭제 기능을 수행하지 않도록 주의를 기울여주시기 바랍니다.
+> 다시 한번 말씀드리지만, 해당 공간의 파일을 수정하거나 삭제하지 않도록 주의를 기울여주시기 바랍니다.
 
 ##### /xrd/store/user
 
