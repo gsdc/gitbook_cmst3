@@ -500,18 +500,18 @@ ssh cms-gpu01
 cp -r /cms/ldap_home/[ID]/my_results /xrd/store/user/[CERN ID]/
 ```
 
-외부에서 접근할 때는 아래 표의 XRootD(root://cms-xrdr.sdfarm.kr:1094) 또는 GSIFTP 주소를 사용합니다.
+외부에서 접근할 때는 아래 표의 XRootD(root://cms-xrdr.sdfarm.kr:1094) 또는 WebDAV(davs://cms-xrdr.sdfarm.kr:1094) 주소를 사용합니다.
 
-GSIFTP 기능도 제공하기 때문에 PhEDEx 및 gfal util을 이용한 SRM 프로토콜 사용도 가능합니다. 하지만, xrootd와 gsiftp를 사용할 때 URL이 다르므로 주의하여야 합니다.
+GSIFTP는 현재 사용되지 않으며, 대신 WebDAV 프로토콜을 제공합니다. WebDAV는 XRootD와 같은 서버(cms-xrdr.sdfarm.kr)와 포트(1094), 같은 디렉토리(/xrd/store)를 사용하고 접두어만 davs:// 로 다릅니다. gfal util(gfal-copy, gfal-ls)이나 davix(davix-ls, davix-get) 명령어로 사용할 수 있습니다.
 
-| Protocol  |                    GSIFTP                    |              XROOT for Public             |        클러스터 내부 (UI, WN)        |
-| --------- | :------------------------------------------: | :---------------------------------------: | :----------------------------------: |
-| Prefix    |                   gsiftp://                  |                  root://                  |           없음 (로컬 경로)           |
-| Server    |               cms-se.sdfarm.kr               |             cms-xrdr.sdfarm.kr            |                   -                  |
-| Directory |                //xrootd/store                |                //xrd/store                |              /xrd/store              |
-| Port      |                     2811                     |                    1094                   |                   -                  |
-| Client    |        gfal util (gfal-copy, gfal-ls)        |                xrdfs, xrdcp               |   ls, cp, ROOT 등 일반 파일 경로로 사용  |
-| Full URL  | gsiftp://cms-se.sdfarm.kr:2811//xrootd/store | root://cms-xrdr.sdfarm.kr:1094//xrd/store |              /xrd/store              |
+| Protocol  | WebDAV | XROOT for Public | 클러스터 내부 (UI, WN) |
+| --------- | :---: | :---: | :---: |
+| Prefix    | davs:// | root:// | 없음 (로컬 경로) |
+| Server    | cms-xrdr.sdfarm.kr | cms-xrdr.sdfarm.kr | - |
+| Directory | /xrd/store | //xrd/store | /xrd/store |
+| Port      | 1094 | 1094 | - |
+| Client    | gfal util (gfal-copy, gfal-ls), davix | xrdfs, xrdcp | ls, cp, ROOT 등 일반 파일 경로로 사용 |
+| Full URL  | davs://cms-xrdr.sdfarm.kr:1094/xrd/store | root://cms-xrdr.sdfarm.kr:1094//xrd/store | /xrd/store |
 
 > **💡 참고**
 >
@@ -962,7 +962,7 @@ Optional, condor-specific :
 
 *데이터 파일을 전송하는 방법과 CMS 데이터셋 전송을 요청하는 방법을 알려드립니다.*
 
-**3. CMS Tier-3 컴퓨팅 환경** 장에 대한 설명 중 gsiftp와 xroot 프로토콜에 관한 설명을 드렸습니다. 연구자 분들은 언제 어느때이건 본인에게 필요한 파일을 Tier-3로 전송할 수 있습니다.
+**3. CMS Tier-3 컴퓨팅 환경** 장에 대한 설명 중 WebDAV와 xroot 프로토콜에 관한 설명을 드렸습니다. 연구자 분들은 언제 어느때이건 본인에게 필요한 파일을 Tier-3로 전송할 수 있습니다.
 
 ### 1. 데이터 전송
 
