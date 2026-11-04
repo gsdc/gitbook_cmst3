@@ -471,7 +471,7 @@ KISTI-GSDC CMS Tier-3에는 머신러닝, GPGPU 기능 제공을 위해 GPU 서�
 
 ```bash
 ## 외부에서는 접근이 안됩니다. (ui 서버에서 접속하세요.)
-ssh [CMS GPU Server]
+ssh cms-gpu01
 ```
 
 ##### 1. /cms (사용자 홈디렉토리 및 스크래치 공간)
@@ -1502,8 +1502,8 @@ MobaXterm 사용자는 다음 링크를 참조하여 본인 컴퓨터측 설정�
 ssh -Y cms-gpu01
 ### ssh local tunneling을 통해 간접 접속이 가능합니다.
 # 본인의 데스크탑에서 접속을 하시려면 2중 포트 포워딩을 하세요.
-# ### ui -> [CMS GPU 서버 FQDN]
-# ex) ssh -4 -L 8889:localhost:8888 $USER@[CMS GPU 서버FQDN]
+# ### ui -> cms-gpu01
+# ex) ssh -4 -L 8889:localhost:8888 $USER@cms-gpu01
 ```
 
 #### VirtualEnv 을 이용한 Python 환경 구축
